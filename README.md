@@ -1,6 +1,6 @@
 # RapidTagsAI Facebook Agent
 
-Har roz automatically Facebook Page par ek SEO / hashtag post karta hai — AI se caption, branded 1080×1080 image, aur rapidtagsai.com ka UTM-tracked link.
+Har roz automatically Facebook Page par ek SEO / hashtag post karta hai — AI se caption, aur rapidtagsai.com ka UTM-tracked link. Ek din branded 1080×1080 image post, agle din 10 second ka animated 1080×1920 Reel.
 
 ```
 GitHub Actions (cron) → pick content pillar → LLM writes post (JSON)
@@ -47,8 +47,16 @@ Notes
 - Scheduled runs can start a few minutes late at peak times — normal for Actions.
 - Model names and Graph API version are env vars, so updates don't need code changes.
 
+## Photo / Reel rotation
+
+- `POST_TYPE=auto` (default): alternates with the last successful post in `data/history.json` (photo → reel → photo …). A failed run doesn't flip the order.
+- `POST_TYPE=photo` or `reel` forces one type (repo Variable, or the *post_type* dropdown on **Run workflow**).
+- Reel: 10s, 30 fps, H.264 + silent AAC, rendered frame-by-frame (satori + resvg) and encoded with the bundled `ffmpeg-static` binary — no system ffmpeg needed. Text stays inside Facebook's safe area (bottom/right UI overlays).
+- Upload uses the Page Reels API (`/{page-id}/video_reels` start → `rupload` → finish) and waits for processing so errors surface in the run. Same Page token permissions as photos.
+- Local preview: `npm run mock` (set `POST_TYPE=reel` in `.env`) → `out/reel.mp4` + `out/reel-preview.png`.
+
 ## Customise
 
 - Topics: edit `PILLARS` in `src/content.ts`.
 - Voice/rules: `SYSTEM` prompt in `src/content.ts`.
-- Design: colors (`C`) and layout in `src/image.ts`.
+- Design: colors (`C`) and layout in `src/image.ts`; reel timeline/animation in `src/reel.ts` (`T` timings, `frame()`).

@@ -4,6 +4,7 @@ import { config } from './config.js';
 
 export interface HistoryEntry {
   date: string;
+  type?: 'photo' | 'reel';
   pillar: string;
   topic: string;
   headline: string;

@@ -10,6 +10,11 @@ on:
         description: 'Generate only, do not post'
         type: boolean
         default: true
+      post_type:
+        description: 'auto = alternate photo/reel day by day'
+        type: choice
+        options: [auto, photo, reel]
+        default: auto
 
 permissions:
   contents: write   # to commit data/history.json back
@@ -21,7 +26,7 @@ concurrency:
 jobs:
   post:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -37,6 +42,7 @@ jobs:
         env:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
+          POST_TYPE: ${{ inputs.post_type || vars.POST_TYPE || 'auto' }}
           IMAGE_MODE: ${{ vars.IMAGE_MODE || 'template' }}
           POST_LANGUAGE: ${{ vars.POST_LANGUAGE || 'English' }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}

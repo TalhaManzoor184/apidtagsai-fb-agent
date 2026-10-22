@@ -10,13 +10,13 @@ const font = (w: number) => readFile(require.resolve(`@fontsource/inter/files/in
 
 const W = 1080;
 const H = 1080;
-const C = {
+export const C = {
   bg1: '#0B1026', bg2: '#1E1B4B', accent: '#22D3EE', accent2: '#A78BFA',
   text: '#FFFFFF', muted: '#C7D2FE', card: 'rgba(255,255,255,0.07)',
 };
 
-type Node = { type: string; props: Record<string, any> };
-const h = (type: string, style: Record<string, any>, children?: any, extra: Record<string, any> = {}): Node =>
+export type Node = { type: string; props: Record<string, any> };
+export const h = (type: string, style: Record<string, any>, children?: any, extra: Record<string, any> = {}): Node =>
   ({ type, props: { style, children, ...extra } });
 
 function layout(post: Post, bgDataUri?: string): Node {
@@ -96,16 +96,17 @@ async function geminiBackground(prompt: string): Promise<string | undefined> {
   }
 }
 
+let fontsCache: any[] | undefined;
+export async function loadFonts(): Promise<any[]> {
+  return (fontsCache ??= [
+    { name: 'Inter', data: await font(400), weight: 400, style: 'normal' },
+    { name: 'Inter', data: await font(600), weight: 600, style: 'normal' },
+    { name: 'Inter', data: await font(800), weight: 800, style: 'normal' },
+  ]);
+}
+
 export async function renderImage(post: Post): Promise<Buffer> {
   const bg = config.imageMode === 'gemini' && !config.mockLlm ? await geminiBackground(post.imagePrompt) : undefined;
-  const svg = await satori(layout(post, bg) as any, {
-    width: W,
-    height: H,
-    fonts: [
-      { name: 'Inter', data: await font(400), weight: 400, style: 'normal' },
-      { name: 'Inter', data: await font(600), weight: 600, style: 'normal' },
-      { name: 'Inter', data: await font(800), weight: 800, style: 'normal' },
-    ],
-  });
+  const svg = await satori(layout(post, bg) as any, { width: W, height: H, fonts: await loadFonts() });
   return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
 }

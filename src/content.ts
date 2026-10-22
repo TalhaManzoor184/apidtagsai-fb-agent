@@ -113,12 +113,12 @@ export async function generatePost(pillar: Pillar, history: HistoryEntry[]): Pro
 }
 
 /** Final Facebook message: caption + tracked link + hashtags. */
-export function buildMessage(post: Post, date: string): string {
+export function buildMessage(post: Post, date: string, type: 'photo' | 'reel' = 'photo'): string {
   const url = new URL(config.siteUrl);
   url.searchParams.set('utm_source', 'facebook');
   url.searchParams.set('utm_medium', 'social');
   url.searchParams.set('utm_campaign', `autopost_${post.pillar}`);
-  url.searchParams.set('utm_content', date);
+  url.searchParams.set('utm_content', `${type}_${date}`);
   return `${post.caption}\n\n👉 Free tag & hashtag generator: ${url.toString()}\n\n${post.hashtags.map(h => '#' + h).join(' ')}`;
 }
 
