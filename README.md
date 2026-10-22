@@ -19,7 +19,7 @@ GitHub Actions (cron) → pick content pillar → LLM writes post (JSON)
 3. **Recommended (non-expiring):** Business Settings → *System Users* → add an Admin system user → **Assign assets** → your Page (full control) → **Generate token** for your app with the permissions above. This is a Page-capable token that doesn't expire.
    - Alternative: Graph API Explorer → get a User token → exchange for a long-lived user token → `GET /me/accounts` → copy that Page's `access_token` (long-lived Page tokens from a long-lived user token don't expire unless the password/permissions change).
 4. Page ID: Page → About → *Page transparency*, or the `id` from `/me/accounts`.
-5. Test: `curl "https://graph.facebook.com/v21.0/<PAGE_ID>?fields=name&access_token=<TOKEN>"` should return your Page name.
+5. Test: `curl "https://graph.facebook.com/v26.0/<PAGE_ID>?fields=name&access_token=<TOKEN>"` should return your Page name.
 
 > The app can stay in Development mode as long as you're an admin of both the app and the Page — you're only posting to your own Page.
 

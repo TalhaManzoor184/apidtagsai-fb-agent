@@ -22,7 +22,7 @@ export const config = {
   geminiImageModel: env('GEMINI_IMAGE_MODEL', 'gemini-2.5-flash-image')!,
 
   // Facebook
-  fbGraphVersion: env('FB_GRAPH_VERSION', 'v21.0')!,
+  fbGraphVersion: env('FB_GRAPH_VERSION', 'v26.0')!,
 
   // Brand / content
   siteUrl: env('SITE_URL', 'https://rapidtagsai.com')!,
