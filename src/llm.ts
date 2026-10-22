@@ -25,9 +25,46 @@ async function anthropic(system: string, user: string): Promise<string> {
   return json.content?.find((c: any) => c.type === 'text')?.text ?? '';
 }
 
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+let geminiCandidates: string[] | undefined;
+let geminiIndex = 0;
+
+/** Configured model first, then other text "flash" models this key can use (newest first). */
+async function loadGeminiCandidates(): Promise<string[]> {
+  const list = [config.geminiTextModel];
+  try {
+    const res = await fetch(`${GEMINI_BASE}/models?pageSize=200`, {
+      headers: { 'x-goog-api-key': required('GEMINI_API_KEY') },
+    });
+    const json: any = await res.json();
+    const names: string[] = (json.models ?? [])
+      .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+      .map((m: any) => String(m.name).replace(/^models\//, ''))
+      .filter((n: string) => /^gemini-[\d.]+-flash/.test(n) && !/(image|tts|audio|live|embedding|preview|exp)/.test(n))
+      .sort((a: string, b: string) => b.localeCompare(a, undefined, { numeric: true }));
+    for (const n of names) if (!list.includes(n)) list.push(n);
+  } catch (e) {
+    console.warn(`Could not list Gemini models: ${(e as Error).message}`);
+  }
+  console.log(`Gemini models to try: ${list.slice(0, 6).join(', ')}`);
+  return list;
+}
+
 async function gemini(system: string, user: string): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiTextModel}:generateContent`;
-  const res = await fetch(url, {
+  geminiCandidates ??= await loadGeminiCandidates();
+  const model = geminiCandidates[geminiIndex % geminiCandidates.length];
+  try {
+    return await geminiCall(model, system, user);
+  } catch (e) {
+    // Busy / unavailable / rate-limited / retired model → next attempt uses the next model
+    if (/Gemini (404|429|500|503)/.test((e as Error).message)) geminiIndex++;
+    throw e;
+  }
+}
+
+async function geminiCall(model: string, system: string, user: string): Promise<string> {
+  console.log(`Gemini model: ${model}`);
+  const res = await fetch(`${GEMINI_BASE}/models/${model}:generateContent`, {
     method: 'POST',
     headers: { 'x-goog-api-key': required('GEMINI_API_KEY'), 'content-type': 'application/json' },
     body: JSON.stringify({
