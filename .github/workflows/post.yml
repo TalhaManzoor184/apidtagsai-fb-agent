@@ -2,8 +2,8 @@ name: Facebook auto-post
 
 on:
   schedule:
-    # Daily at 09:07 UTC = 14:07 Pakistan time. Add more lines for more posts/day.
-    - cron: '7 9 * * *'
+    # Daily at 15:40 UTC = 8:40 PM Pakistan time. Add more lines for more posts/day.
+    - cron: '40 15 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

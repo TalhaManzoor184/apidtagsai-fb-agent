@@ -40,7 +40,7 @@ npm run post              # posts for real
    - **Secrets:** `ANTHROPIC_API_KEY` (or `GEMINI_API_KEY`), `FB_PAGE_ID`, `FB_PAGE_ACCESS_TOKEN`
    - **Variables (optional):** `LLM_PROVIDER`, `IMAGE_MODE`, `POST_LANGUAGE`, `ANTHROPIC_MODEL`, `GEMINI_IMAGE_MODEL`, `FB_GRAPH_VERSION`
 3. Actions → *Facebook auto-post* → **Run workflow** (dry run is on by default) → download the `post-…` artifact to preview.
-4. The schedule then posts daily at 14:07 PKT. Edit the `cron` lines in `.github/workflows/post.yml` for a different time or more posts per day.
+4. The schedule then posts daily at 8:40 PM PKT. Edit the `cron` lines in `.github/workflows/post.yml` for a different time or more posts per day.
 
 Notes
 - GitHub disables scheduled workflows after 60 days without repo activity; the daily history commit keeps it active.
