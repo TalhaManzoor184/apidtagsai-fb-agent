@@ -100,7 +100,8 @@ function validate(raw: any, pillar: Pillar): Post {
 export async function generatePost(pillar: Pillar, history: HistoryEntry[]): Promise<Post> {
   if (config.mockLlm) return validate(MOCK, pillar);
   let lastErr: unknown;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    if (attempt > 1) await new Promise(r => setTimeout(r, Math.min(60, 10 * 2 ** (attempt - 2)) * 1000)); // 10s, 20s, 40s, 60s
     try {
       return validate(extractJson(await complete(SYSTEM, userPrompt(pillar, history))), pillar);
     } catch (e) {
