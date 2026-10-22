@@ -1,10 +1,13 @@
 import { spawn } from 'node:child_process';
+import { readdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { config } from './config.js';
 import type { Post } from './content.js';
 import { C, h, loadFonts, type Node } from './image.js';
+import { generateTrack, hashSeed } from './music.js';
 
 const require = createRequire(import.meta.url);
 const FFMPEG: string = process.env.FFMPEG_PATH || require('ffmpeg-static');
@@ -90,19 +93,50 @@ function frame(post: Post, t: number): Node {
   ]);
 }
 
-/** Renders a 10s 1080x1920 MP4 (H.264 + silent AAC track) and returns it as a Buffer. */
+const MUSIC_DIR = 'assets/music';
+const AUDIO_EXT = /\.(mp3|m4a|aac|wav|ogg)$/i;
+
+/**
+ * Audio input args for ffmpeg.
+ * MUSIC=auto (default): a random file from assets/music/ if any exist, otherwise generated music.
+ * MUSIC=synth: always generated. MUSIC=off: silent track.
+ */
+async function audioInput(post: Post, outPath: string): Promise<{ args: string[]; label: string }> {
+  const mode = (process.env.MUSIC ?? 'auto').trim().toLowerCase();
+  const seed = hashSeed(post.topic + post.headline);
+  if (mode === 'off') {
+    return { args: ['-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000'], label: 'silent' };
+  }
+  if (mode === 'auto') {
+    const files = (await readdir(MUSIC_DIR).catch(() => [] as string[])).filter(f => AUDIO_EXT.test(f)).sort();
+    if (files.length) {
+      const file = files[seed % files.length];
+      return { args: ['-stream_loop', '-1', '-i', join(MUSIC_DIR, file)], label: `file ${file}` };
+    }
+  }
+  const track = generateTrack(REEL_SECONDS, seed);
+  const wavPath = join(dirname(outPath), 'music.wav');
+  await writeFile(wavPath, track.wav);
+  return { args: ['-i', wavPath], label: `generated ${track.key}, ${track.bpm} bpm` };
+}
+
+/** Renders a 10s 1080x1920 MP4 (H.264 + AAC music) to outPath. */
 export async function renderReel(post: Post, outPath: string): Promise<void> {
   const fonts = await loadFonts();
   const total = REEL_SECONDS * FPS;
   const started = Date.now();
+  const audio = await audioInput(post, outPath);
+  const fadeOut = (REEL_SECONDS - 0.7).toFixed(2);
 
   const ff = spawn(FFMPEG, [
     '-y', '-hide_banner', '-loglevel', 'error',
     '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${W}x${H}`, '-r', String(FPS), '-i', 'pipe:0',
-    '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000',
+    ...audio.args,
+    '-map', '0:v', '-map', '1:a',
+    '-af', `afade=t=in:d=0.1,afade=t=out:st=${fadeOut}:d=0.7,aformat=channel_layouts=stereo`,
     '-t', String(REEL_SECONDS), '-shortest',
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-g', String(FPS * 2),
-    '-c:a', 'aac', '-b:a', '128k', '-ar', '48000',
+    '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
     '-movflags', '+faststart', outPath,
   ], { stdio: ['pipe', 'inherit', 'pipe'] });
 
@@ -120,7 +154,7 @@ export async function renderReel(post: Post, outPath: string): Promise<void> {
   }
   ff.stdin.end();
   await done;
-  console.log(`Reel rendered: ${total} frames in ${((Date.now() - started) / 1000).toFixed(1)}s → ${outPath}`);
+  console.log(`Reel rendered: ${total} frames in ${((Date.now() - started) / 1000).toFixed(1)}s, music: ${audio.label} → ${outPath}`);
 }
 
 /** Single still of the finished reel layout (used for previews). */
