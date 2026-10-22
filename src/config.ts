@@ -16,7 +16,7 @@ export const config = {
   // Auto-picks Gemini when only GEMINI_API_KEY is set; override with LLM_PROVIDER
   llmProvider: (env('LLM_PROVIDER') ?? (env('ANTHROPIC_API_KEY') ? 'anthropic' : env('GEMINI_API_KEY') ? 'gemini' : 'anthropic')) as 'anthropic' | 'gemini',
   anthropicModel: env('ANTHROPIC_MODEL', 'claude-sonnet-5-5')!,
-  geminiTextModel: env('GEMINI_TEXT_MODEL', 'gemini-2.5-flash')!,
+  geminiTextModel: env('GEMINI_TEXT_MODEL', 'gemini-3.8-flash')!,
 
   // Image: "template" = branded card (free, consistent), "gemini" = AI background + branded overlay
   imageMode: (env('IMAGE_MODE', 'template') as 'template' | 'gemini'),
