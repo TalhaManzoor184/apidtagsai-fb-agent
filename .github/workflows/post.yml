@@ -36,7 +36,7 @@ jobs:
         run: npm start
         env:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
-          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'anthropic' }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
           IMAGE_MODE: ${{ vars.IMAGE_MODE || 'template' }}
           POST_LANGUAGE: ${{ vars.POST_LANGUAGE || 'English' }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
