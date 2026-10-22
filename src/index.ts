@@ -38,5 +38,9 @@ async function main() {
 
 main().catch(err => {
   console.error(err);
+  if (process.env.GITHUB_ACTIONS) {
+    const msg = String((err as Error)?.message ?? err).replace(/\r?\n/g, ' ').slice(0, 900);
+    console.log(`::error title=Agent failed::${msg}`);
+  }
   process.exit(1);
 });
