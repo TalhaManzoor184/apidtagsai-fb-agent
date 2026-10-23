@@ -111,7 +111,8 @@ const clamp = (s: unknown, n: number) => {
 const BANNED = /\b(guarantee[ds]?|go(?:es)? viral (?:overnight|instantly)|100% (?:rank|growth))\b/i;
 
 function validate(raw: any, plan: Plan, sources?: Source[]): Post {
-  const bullets = Array.isArray(raw.bullets) ? raw.bullets.slice(0, 3).map((b: unknown) => clamp(b, 52)) : [];
+  const unnumber = (x: unknown) => String(x ?? '').replace(/^\s*(?:\d+[.):]\s+|\d+\s+-\s+|[-•*✅]\s+|(?:step|tip)\s*\d+\s*[:.-]\s*)/i, '');
+  const bullets = Array.isArray(raw.bullets) ? raw.bullets.slice(0, 3).map((b: unknown) => clamp(unnumber(b), 52)) : [];
   const hashtags: string[] = (Array.isArray(raw.hashtags) ? raw.hashtags : [])
     .map((h: unknown) => String(h).replace(/^#/, '').replace(/[^\p{L}\p{N}_]/gu, ''))
     .filter(Boolean)
