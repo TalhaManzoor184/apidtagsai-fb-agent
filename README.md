@@ -26,7 +26,7 @@ GitHub Actions (cron) → weekday category + format → (trend research) → LLM
 4. Page ID: Page → About → *Page transparency*, or the `id` from `/me/accounts`.
 5. Test: `curl "https://graph.facebook.com/v26.0/<PAGE_ID>?fields=name&access_token=<TOKEN>"` should return your Page name.
 
-> The app can stay in Development mode as long as you're an admin of both the app and the Page — you're only posting to your own Page.
+> **Switch the app to Live mode.** Posts published by an app in Development mode are visible only to people with a role on the app, not to the public. App settings → Basic: add a Privacy Policy URL and category, then set App Mode to Live. Posting to your own Page works with standard access; no App Review needed.
 
 ## 2. Run locally
 
