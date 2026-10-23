@@ -99,8 +99,11 @@ export async function research(prompt: string): Promise<{ notes: string; sources
       const r = await geminiCall(model, 'You are a careful research assistant. Use Google Search. Report only what the search results support, with dates.', prompt, true);
       if (r.text.trim() && r.sources.length) return { notes: r.text.trim(), sources: r.sources };
       console.warn('Research returned no grounded sources');
+      if (process.env.GITHUB_ACTIONS) console.log(`::warning title=Research::${model} returned no grounded sources: ${r.text.slice(0, 300).replace(/\n/g, ' ')}`);
     } catch (e) {
-      console.warn(`Research with ${model} failed: ${(e as Error).message}`);
+      const msg = `Research with ${model} failed: ${(e as Error).message}`;
+      console.warn(msg);
+      if (process.env.GITHUB_ACTIONS) console.log(`::warning title=Research::${msg.slice(0, 900).replace(/\n/g, ' ')}`);
     }
   }
   return undefined;
