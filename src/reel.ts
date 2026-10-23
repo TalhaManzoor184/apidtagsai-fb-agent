@@ -16,46 +16,110 @@ const FFMPEG: string = process.env.FFMPEG_PATH || require('ffmpeg-static');
 const W = 1080;
 const H = 1920;
 const FPS = 30;
-export const REEL_SECONDS = 10;
+export const REEL_SECONDS = 20;
 
-// Timeline (seconds)
-const T = { pill: 0.0, headline: 0.3, subline: 1.0, bullet0: 2.2, bulletGap: 1.1, cta: 6.4 };
-const DUR = 0.55;
+// Scene timeline (seconds): hook → 3 tips → CTA
+const SCENES = [
+  { id: 'hook', start: 0, end: 4 },
+  { id: 'tip0', start: 4, end: 8 },
+  { id: 'tip1', start: 8, end: 12 },
+  { id: 'tip2', start: 12, end: 16 },
+  { id: 'cta', start: 16, end: REEL_SECONDS },
+] as const;
+const IN = 0.5;   // scene enter duration
+const OUT = 0.35; // scene exit duration
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const easeOut = (x: number) => 1 - Math.pow(1 - clamp01(x), 3);
+const easeIn = (x: number) => Math.pow(clamp01(x), 3);
 const easeBack = (x: number) => { const c = 1.6; const t = clamp01(x) - 1; return 1 + (c + 1) * t * t * t + c * t * t; };
-/** 0 → 1 progress of an element that starts at `start` seconds */
-const p = (t: number, start: number, dur = DUR) => easeOut((t - start) / dur);
+
+const STEP_LABEL: Record<string, string> = {
+  'step-by-step': 'Step', 'tool-demo': 'Step', mistakes: 'Mistake', checklist: 'Check', 'myth-vs-fact': 'Point', 'before-after': 'Point',
+};
+
+function headlineSize(text: string, base: number) {
+  return text.length > 44 ? base * 0.68 : text.length > 34 ? base * 0.77 : text.length > 26 ? base * 0.88 : base;
+}
+
+/** Enter/exit animation for an element inside a scene; `delay` staggers elements. */
+function anim(t: number, scene: { start: number; end: number }, delay = 0, last = false) {
+  const kIn = easeOut((t - scene.start - delay) / IN);
+  const kOut = last ? 0 : easeIn((t - (scene.end - OUT)) / OUT);
+  return { opacity: kIn * (1 - kOut), transform: `translateY(${(1 - kIn) * 60 - kOut * 50}px)` };
+}
+
+function brandPill(size = 36) {
+  return h('div', { display: 'flex', alignItems: 'center', gap: 14, padding: `${size * 0.44}px ${size * 0.9}px`, borderRadius: 999,
+    background: 'rgba(34,211,238,0.14)', border: `3px solid ${C.accent}`, fontSize: size, fontWeight: 800, color: C.accent },
+    [h('div', { display: 'flex' }, '#'), h('div', { display: 'flex' }, config.brandName)]);
+}
+
+function hookScene(post: Post, t: number, sc: typeof SCENES[number]): Node[] {
+  return [
+    h('div', { display: 'flex', ...anim(t, sc, 0) }, [brandPill()]),
+    h('div', { display: 'flex', marginTop: 60, fontSize: headlineSize(post.headline, 124), fontWeight: 800, lineHeight: 1.03,
+      letterSpacing: -3, ...anim(t, sc, 0.25) }, post.headline),
+    h('div', { display: 'flex', marginTop: 40, fontSize: 48, color: C.muted, lineHeight: 1.35, ...anim(t, sc, 0.8) }, post.subline),
+  ];
+}
+
+function tipScene(post: Post, t: number, sc: typeof SCENES[number], i: number): Node[] {
+  const label = STEP_LABEL[post.format] ?? 'Tip';
+  const color = i % 2 ? C.accent2 : C.accent;
+  const pop = easeBack((t - sc.start) / 0.6);
+  const dots = [0, 1, 2].map(d => h('div', { display: 'flex', width: d === i ? 44 : 14, height: 14, borderRadius: 7,
+    background: d === i ? color : 'rgba(255,255,255,0.25)' }));
+  return [
+    h('div', { display: 'flex', fontSize: 34, fontWeight: 600, color: C.muted, lineHeight: 1.3, ...anim(t, sc, 0) }, post.headline),
+    h('div', { display: 'flex', alignItems: 'center', gap: 28, marginTop: 70, ...anim(t, sc, 0.05) }, [
+      h('div', { display: 'flex', width: 150, height: 150, borderRadius: 75, alignItems: 'center', justifyContent: 'center',
+        backgroundImage: `linear-gradient(135deg, ${C.accent} 0%, ${C.accent2} 100%)`, color: C.bg1, fontSize: 84, fontWeight: 800,
+        transform: `scale(${0.6 + 0.4 * pop})` }, String(i + 1)),
+      h('div', { display: 'flex', fontSize: 40, fontWeight: 800, color, letterSpacing: 2 }, `${label.toUpperCase()} ${i + 1}/3`),
+    ]),
+    h('div', { display: 'flex', marginTop: 50, fontSize: 80, fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, ...anim(t, sc, 0.2) },
+      post.bullets[i] ?? ''),
+    ...(post.details?.[i]
+      ? [h('div', { display: 'flex', marginTop: 34, fontSize: 46, color: C.muted, lineHeight: 1.35, ...anim(t, sc, 0.55) }, post.details[i])]
+      : []),
+    h('div', { display: 'flex', gap: 12, marginTop: 60, ...anim(t, sc, 0.3) }, dots),
+  ];
+}
+
+function ctaScene(post: Post, t: number, sc: typeof SCENES[number]): Node[] {
+  const domain = new URL(config.siteUrl).hostname;
+  const k = (t - sc.start - 0.3) / 0.6;
+  const scale = k <= 0 ? 0.85 : 0.85 + 0.15 * easeBack(k);
+  const pulse = t > sc.start + 1.2 ? 1 + 0.025 * Math.sin((t - sc.start) * 5) : 1;
+  return [
+    h('div', { display: 'flex', ...anim(t, sc, 0, true) }, [brandPill(32)]),
+    h('div', { display: 'flex', marginTop: 50, fontSize: 70, fontWeight: 800, lineHeight: 1.12, letterSpacing: -2, ...anim(t, sc, 0.1, true) },
+      post.cta || 'Try the free tools'),
+    h('div', { display: 'flex', marginTop: 70, justifyContent: 'center', opacity: clamp01(k * 2), transform: `scale(${scale * pulse})` }, [
+      h('div', { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '38px 64px', borderRadius: 30,
+        backgroundImage: `linear-gradient(90deg, ${C.accent} 0%, ${C.accent2} 100%)`, color: C.bg1 }, [
+        h('div', { display: 'flex', fontSize: 36, fontWeight: 600 }, 'Free AI tools for creators'),
+        h('div', { display: 'flex', fontSize: 64, fontWeight: 800, letterSpacing: -1 }, domain),
+      ]),
+    ]),
+  ];
+}
 
 function frame(post: Post, t: number): Node {
-  const domain = new URL(config.siteUrl).hostname;
-  const enter = (k: number, dy = 40) => ({ opacity: k, transform: `translateY(${(1 - k) * dy}px)` });
-
-  const bullets = post.bullets.map((b, i) => {
-    const k = p(t, T.bullet0 + i * T.bulletGap);
-    return h('div', {
-      display: 'flex', alignItems: 'center', gap: 28, padding: '26px 34px', background: C.card, borderRadius: 26,
-      border: '1px solid rgba(255,255,255,0.12)', opacity: k, transform: `translateX(${(1 - k) * -80}px)`,
-    }, [
-      h('div', { display: 'flex', width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center',
-        background: i % 2 ? C.accent2 : C.accent, color: C.bg1, fontSize: 32, fontWeight: 800, flexShrink: 0 }, String(i + 1)),
-      h('div', { display: 'flex', flex: 1, fontSize: 42, fontWeight: 600, lineHeight: 1.25 }, b),
-    ]);
-  });
-
-  const ctaK = (t - T.cta) / 0.6;
-  const ctaScale = ctaK <= 0 ? 0.85 : 0.85 + 0.15 * easeBack(ctaK);
-  const pulse = t > T.cta + 0.8 ? 1 + 0.025 * Math.sin((t - T.cta) * 6) : 1;
+  const sc = SCENES.find(s => t >= s.start && t < s.end) ?? SCENES[SCENES.length - 1];
+  const content = sc.id === 'hook' ? hookScene(post, t, sc)
+    : sc.id === 'cta' ? ctaScene(post, t, sc)
+    : tipScene(post, t, sc, Number(sc.id.slice(3)));
 
   return h('div', {
     width: W, height: H, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
     backgroundImage: `linear-gradient(160deg, ${C.bg1} 0%, ${C.bg2} 100%)`, fontFamily: 'Inter', color: C.text,
   }, [
     // Slowly drifting background shapes
-    h('div', { position: 'absolute', top: 120 + Math.sin(t * 0.6) * 30, right: -140, display: 'flex', fontSize: 820, fontWeight: 800,
-      lineHeight: 1, color: 'rgba(167,139,250,0.07)', transform: `rotate(${-8 + t * 1.6}deg)` }, '#'),
-    h('div', { position: 'absolute', bottom: -300 + Math.cos(t * 0.5) * 40, left: -260 + t * 12, width: 900, height: 900,
+    h('div', { position: 'absolute', top: 120 + Math.sin(t * 0.4) * 40, right: -140, display: 'flex', fontSize: 820, fontWeight: 800,
+      lineHeight: 1, color: 'rgba(167,139,250,0.07)', transform: `rotate(${-8 + t * 1.2}deg)` }, '#'),
+    h('div', { position: 'absolute', bottom: -300 + Math.cos(t * 0.35) * 50, left: -300 + t * 9, width: 900, height: 900,
       borderRadius: 450, display: 'flex',
       backgroundImage: 'radial-gradient(circle, rgba(34,211,238,0.20) 0%, rgba(34,211,238,0) 70%)' }),
 
@@ -68,28 +132,7 @@ function frame(post: Post, t: number): Node {
 
     // Content kept inside the safe area (FB overlays caption/buttons at the bottom and icons on the right)
     h('div', { display: 'flex', flexDirection: 'column', justifyContent: 'center', width: W, height: H, boxSizing: 'border-box',
-      padding: '140px 120px 380px 90px', position: 'relative' }, [
-      h('div', { display: 'flex', ...enter(p(t, T.pill)) }, [
-        h('div', { display: 'flex', alignItems: 'center', gap: 14, padding: '16px 32px', borderRadius: 999,
-          background: 'rgba(34,211,238,0.14)', border: `3px solid ${C.accent}`, fontSize: 36, fontWeight: 800, color: C.accent },
-          [h('div', { display: 'flex' }, '#'), h('div', { display: 'flex' }, config.brandName)]),
-      ]),
-      h('div', { display: 'flex', marginTop: 50, fontSize: post.headline.length > 44 ? 76 : post.headline.length > 34 ? 86 : post.headline.length > 26 ? 98 : 112, fontWeight: 800,
-        lineHeight: 1.04, letterSpacing: -3, ...enter(p(t, T.headline), 60) }, post.headline),
-      h('div', { display: 'flex', marginTop: 34, fontSize: 44, color: C.muted, lineHeight: 1.35,
-        ...enter(p(t, T.subline)) }, post.subline),
-      h('div', { display: 'flex', flexDirection: 'column', gap: 20, marginTop: 50 }, bullets),
-
-      // CTA
-      h('div', { display: 'flex', marginTop: 70, justifyContent: 'center',
-        opacity: clamp01(ctaK * 2), transform: `scale(${ctaScale * pulse})` }, [
-        h('div', { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '32px 56px', borderRadius: 28,
-          backgroundImage: `linear-gradient(90deg, ${C.accent} 0%, ${C.accent2} 100%)`, color: C.bg1 }, [
-          h('div', { display: 'flex', fontSize: 34, fontWeight: 600 }, 'Free AI tools for creators'),
-          h('div', { display: 'flex', fontSize: 58, fontWeight: 800, letterSpacing: -1 }, domain),
-        ]),
-      ]),
-    ]),
+      padding: '140px 120px 380px 90px', position: 'relative' }, content),
   ]);
 }
 
@@ -158,7 +201,7 @@ export async function renderReel(post: Post, outPath: string): Promise<void> {
 }
 
 /** Single still of the finished reel layout (used for previews). */
-export async function renderReelStill(post: Post, t = REEL_SECONDS - 0.5): Promise<Buffer> {
+export async function renderReelStill(post: Post, t = 0.6 * 4 + 1.5): Promise<Buffer> {
   const svg = await satori(frame(post, t) as any, { width: W, height: H, fonts: await loadFonts() });
   return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
 }

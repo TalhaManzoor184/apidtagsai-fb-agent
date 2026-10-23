@@ -15,6 +15,8 @@ export interface Post {
   headline: string;      // big text on image / reel hook
   subline: string;
   bullets: string[];     // 3 short points on image
+  details: string[];     // one supporting line per bullet (reel tip scenes)
+  cta: string;           // category CTA (reel end card)
   caption: string;       // FB post body (no URL, no hashtags)
   hashtags: string[];    // without '#'
   imagePrompt: string;   // used only in IMAGE_MODE=gemini
@@ -61,7 +63,7 @@ function userPrompt(plan: Plan, type: PostType, history: HistoryEntry[], date: s
     .map(h => `- [${h.pillar}${h.format ? '/' + h.format : ''}] ${h.headline} — ${h.topic}`).join('\n') || '(none)';
 
   const typeGuide = type === 'reel'
-    ? `This is a short vertical REEL (on-screen text animation, no voice-over). "headline" is the scroll-stopping HOOK shown first: name the viewer's problem or promise one specific payoff. Each bullet is one self-contained on-screen point. Keep the whole reel focused on ONE useful idea. Caption is shorter: 50-110 words.`
+    ? `This is a 20-second vertical REEL (on-screen text scenes, no voice-over): hook scene, then one scene per bullet with its detail line, then a CTA end card. "headline" is the scroll-stopping HOOK shown first: name the viewer's problem or promise one specific payoff. Each bullet is one self-contained on-screen point. Keep the whole reel focused on ONE useful idea. Caption is shorter: 50-110 words.`
     : `This is an IMAGE post (one branded card). Caption: 70-150 words.`;
 
   return `Today: ${date}. Platform: Facebook Page.
@@ -87,6 +89,7 @@ Return JSON with exactly these keys:
   "headline": "max 48 characters",
   "subline": "max 90 characters, supports the headline",
   "bullets": ["exactly 3 items, each max 48 characters"],
+  "details": ["exactly 3 items, each max 85 characters: one concrete supporting sentence for the matching bullet"],
   "caption": "the Facebook caption",
   "hashtags": ["3-7 highly relevant hashtags without #, no unrelated trending tags"],
   "imagePrompt": "clean modern background illustration for this topic, NO text, NO logos"
@@ -122,6 +125,8 @@ function validate(raw: any, plan: Plan, sources?: Source[]): Post {
     headline: clamp(raw.headline, 56),
     subline: clamp(raw.subline, 100),
     bullets,
+    details: Array.isArray(raw.details) ? raw.details.slice(0, 3).map((d: unknown) => clamp(d, 95)) : [],
+    cta: plan.category.cta,
     caption: String(raw.caption ?? '').replace(/https?:\/\/\S+/g, '').replace(/(^|\s)#[\p{L}\p{N}_]+/gu, '$1').trim(),
     hashtags: ['RapidTagsAI', ...new Set(hashtags)].slice(0, 8),
     imagePrompt: String(raw.imagePrompt ?? ''),
@@ -179,6 +184,7 @@ const MOCK = {
   headline: 'Stop Using 30 Hashtags',
   subline: 'Fewer, more specific hashtags help Instagram understand who your Reel is for.',
   bullets: ['Pick 3-5 tags that describe the Reel', 'Mix one broad tag with niche ones', 'Skip spammy tags like #followforfollow'],
+  details: ['Describe the topic of this Reel, not your mood or the day.', 'One wide tag for reach, two to four niche tags for the right viewers.', 'Engagement-bait tags attract the wrong audience and add no context.'],
   caption: "Still pasting 30 hashtags under every Reel? 🤔\n\nInstagram uses hashtags mainly to understand what your content is about. A short list of specific, relevant tags gives a clearer signal than a wall of generic ones.\n\n✅ Describe the topic, not your mood\n✅ Combine 1 broad tag with 2-4 niche tags\n✅ Rotate sets per post instead of copy-pasting\n\nHow many hashtags do you use right now?\n\nTry the free tools at RapidTagsAI.com.",
   hashtags: ['InstagramTips', 'ReelsTips', 'HashtagStrategy', 'ContentCreator'],
   imagePrompt: 'Minimal 3D illustration of a smartphone with floating hashtag symbols, purple and blue gradient, soft lighting',

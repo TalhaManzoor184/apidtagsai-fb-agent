@@ -1,6 +1,6 @@
 # RapidTagsAI Facebook Agent
 
-Har roz automatically Facebook Page par ek SEO / hashtag post karta hai — AI se caption, aur rapidtagsai.com ka UTM-tracked link. Ek din branded 1080×1080 image post, agle din 10 second ka animated 1080×1920 Reel.
+Har roz automatically Facebook Page par ek SEO / hashtag post karta hai — AI se caption, aur rapidtagsai.com ka UTM-tracked link. Ek din branded 1080×1080 image post, agle din 20 second ka animated 1080×1920 Reel (hook → 3 tip scenes → CTA).
 
 ```
 GitHub Actions (cron) → weekday category + format → (trend research) → LLM writes post (JSON)
@@ -56,7 +56,7 @@ Notes
 
 - `POST_TYPE=auto` (default): alternates with the last successful post in `data/history.json` (photo → reel → photo …). A failed run doesn't flip the order.
 - `POST_TYPE=photo` or `reel` forces one type (repo Variable, or the *post_type* dropdown on **Run workflow**).
-- Reel: 10s, 30 fps, H.264 + AAC music, rendered frame-by-frame (satori + resvg) and encoded with the bundled `ffmpeg-static` binary — no system ffmpeg needed. Text stays inside Facebook's safe area (bottom/right UI overlays).
+- Reel: 20s (hook 0-4s, one scene per tip 4-16s, CTA 16-20s), 30 fps, H.264 + AAC music, rendered frame-by-frame (satori + resvg) and encoded with the bundled `ffmpeg-static` binary — no system ffmpeg needed. Text stays inside Facebook's safe area (bottom/right UI overlays).
 - Upload uses the Page Reels API (`/{page-id}/video_reels` start → `rupload` → finish) and waits for processing so errors surface in the run. Same Page token permissions as photos.
 - Music: each reel gets an original generated track (`src/music.ts`: seeded key/tempo/chords, pads + arp + bass + drums, ~−14 LUFS), so no copyright claims. Put licensed tracks in `assets/music/` to use those instead; `MUSIC=off` for silence.
 - Local preview: `npm run mock` (set `POST_TYPE=reel` in `.env`) → `out/reel.mp4` + `out/reel-preview.png`.
@@ -65,4 +65,4 @@ Notes
 
 - Categories, calendar, formats, CTAs, voice and rules: `src/guide.ts`.
 - Test a category: **Run workflow** → *category* dropdown.
-- Design: colors (`C`) and layout in `src/image.ts`; reel timeline/animation in `src/reel.ts` (`T` timings, `frame()`).
+- Design: colors (`C`) and layout in `src/image.ts`; reel timeline/animation in `src/reel.ts` (`SCENES` timeline, scene functions).
