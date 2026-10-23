@@ -5,10 +5,14 @@ import { config } from './config.js';
 export interface HistoryEntry {
   date: string;
   type?: 'photo' | 'reel';
-  pillar: string;
+  platform?: string;
+  pillar: string;     // content category id
+  format?: string;
   topic: string;
   headline: string;
   postId?: string;
+  url?: string;
+  sources?: string[];
 }
 
 export async function loadHistory(): Promise<HistoryEntry[]> {

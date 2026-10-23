@@ -15,6 +15,11 @@ on:
         type: choice
         options: [auto, photo, reel]
         default: auto
+      category:
+        description: 'Override weekday category (blank = calendar)'
+        type: choice
+        options: ['', instagram-tags, tiktok-tags, youtube-tags, video-ideas, youtube-descriptions, seo-titles, trending-ideas, seo-checker, seo-blogs]
+        default: ''
 
 permissions:
   contents: write   # to commit data/history.json back
@@ -44,6 +49,8 @@ jobs:
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
           POST_TYPE: ${{ inputs.post_type || vars.POST_TYPE || 'auto' }}
           MUSIC: ${{ vars.MUSIC || 'auto' }}
+          CATEGORY: ${{ inputs.category }}
+          SEO_CHECKER_LIVE: ${{ vars.SEO_CHECKER_LIVE }}
           IMAGE_MODE: ${{ vars.IMAGE_MODE || 'template' }}
           POST_LANGUAGE: ${{ vars.POST_LANGUAGE || 'English' }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}

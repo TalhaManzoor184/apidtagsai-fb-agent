@@ -85,7 +85,7 @@ function frame(post: Post, t: number): Node {
         opacity: clamp01(ctaK * 2), transform: `scale(${ctaScale * pulse})` }, [
         h('div', { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '32px 56px', borderRadius: 28,
           backgroundImage: `linear-gradient(90deg, ${C.accent} 0%, ${C.accent2} 100%)`, color: C.bg1 }, [
-          h('div', { display: 'flex', fontSize: 34, fontWeight: 600 }, 'Generate tags & hashtags free'),
+          h('div', { display: 'flex', fontSize: 34, fontWeight: 600 }, 'Free AI tools for creators'),
           h('div', { display: 'flex', fontSize: 58, fontWeight: 800, letterSpacing: -1 }, domain),
         ]),
       ]),

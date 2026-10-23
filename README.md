@@ -3,12 +3,17 @@
 Har roz automatically Facebook Page par ek SEO / hashtag post karta hai — AI se caption, aur rapidtagsai.com ka UTM-tracked link. Ek din branded 1080×1080 image post, agle din 10 second ka animated 1080×1920 Reel.
 
 ```
-GitHub Actions (cron) → pick content pillar → LLM writes post (JSON)
-   → render image (satori + resvg) → Graph API /{page-id}/photos → save history
+GitHub Actions (cron) → weekday category + format → (trend research) → LLM writes post (JSON)
+   → render image or reel → Graph API (photos / video_reels) → save history
 ```
 
-- **8 content pillars** rotate (YouTube tags, TikTok/Instagram hashtags, myth vs fact, mistakes, niche hashtag packs, tool tutorial, algorithm insight).
-- **No repeats:** last 40 topics are fed to the model; `data/history.json` is committed back after each post.
+- **Content guide:** `docs/content-guide.md` (original brief) is encoded in `src/guide.ts`: 9 categories with goals, ideas, CTAs and rules; the weekly calendar; 9 post formats; brand voice and hard rules.
+- **Weekly calendar (PKT):** Mon Instagram tags · Tue TikTok tags · Wed YouTube tags · Thu video ideas · Fri YouTube descriptions / SEO titles · Sat trending ideas · Sun SEO checker / SEO blogs. Two-category days alternate.
+- **Formats** rotate least-recently-used (tip, step-by-step, before/after, myth vs fact, mistakes, checklist, tool demo, challenge, soft promo).
+- **No repeats:** everything published in the last 30 days is fed to the model. `data/history.json` records date, platform, type, category, format, topic, URL.
+- **Trending (Saturday):** Gemini + Google Search grounding fetches current trends with sources first; without verified research the post is written as an evergreen idea and never called "trending".
+- **SEO checker claims:** off until you set repo Variable `SEO_CHECKER_LIVE=true`.
+- **Guardrails:** captions that promise guarantees are rejected and regenerated; 3-8 hashtags; CTA per category.
 - **Images:** `template` mode = branded card (free, consistent). `gemini` mode = AI-generated background with the same branded overlay (falls back to template if the image call fails).
 - **Providers:** Claude (default) or Gemini for text, switch with `LLM_PROVIDER`.
 
@@ -58,6 +63,6 @@ Notes
 
 ## Customise
 
-- Topics: edit `PILLARS` in `src/content.ts`.
-- Voice/rules: `SYSTEM` prompt in `src/content.ts`.
+- Categories, calendar, formats, CTAs, voice and rules: `src/guide.ts`.
+- Test a category: **Run workflow** → *category* dropdown.
 - Design: colors (`C`) and layout in `src/image.ts`; reel timeline/animation in `src/reel.ts` (`T` timings, `frame()`).

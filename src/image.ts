@@ -64,7 +64,7 @@ function layout(post: Post, bgDataUri?: string): Node {
       h('div', { display: 'flex', flexDirection: 'column', gap: 16, marginTop: 44 }, bullets),
       // Footer
       h('div', { display: 'flex', marginTop: 'auto', paddingTop: 36, justifyContent: 'space-between', alignItems: 'center' }, [
-        h('div', { display: 'flex', fontSize: 26, color: C.muted }, 'Free AI tags & hashtags'),
+        h('div', { display: 'flex', fontSize: 26, color: C.muted }, 'Free AI tools for creators'),
         h('div', { display: 'flex', padding: '14px 28px', borderRadius: 14, fontSize: 28, fontWeight: 800, color: C.bg1,
           backgroundImage: `linear-gradient(90deg, ${C.accent} 0%, ${C.accent2} 100%)` }, domain),
       ]),

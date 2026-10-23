@@ -1,12 +1,10 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { config } from './config.js';
-import { buildMessage, generatePost, pickPillar } from './content.js';
+import { buildMessage, generatePost, planContent, type PostType } from './content.js';
 import { renderImage } from './image.js';
 import { renderReel, renderReelStill } from './reel.js';
 import { postPhoto, postReel } from './facebook.js';
 import { loadHistory, saveHistory, type HistoryEntry } from './history.js';
-
-type PostType = 'photo' | 'reel';
 
 /** POST_TYPE=photo|reel forces a type; otherwise alternate with the previous successful post. */
 function resolvePostType(history: HistoryEntry[]): PostType {
@@ -16,15 +14,22 @@ function resolvePostType(history: HistoryEntry[]): PostType {
   return last === 'reel' ? 'photo' : 'reel';
 }
 
+/** GitHub Actions annotation (shows on the run summary page). */
+function annotate(level: 'notice' | 'error', title: string, msg: string) {
+  if (!process.env.GITHUB_ACTIONS) return;
+  const esc = msg.slice(0, 3500).replace(/%/g, '%25').replace(/\r/g, '').replace(/\n/g, '%0A');
+  console.log(`::${level} title=${title}::${esc}`);
+}
+
 async function main() {
   const date = new Date().toISOString().slice(0, 10);
   const history = await loadHistory();
 
   const type = resolvePostType(history);
-  const pillar = pickPillar(history);
-  console.log(`Type: ${type} | Pillar: ${pillar.id}`);
+  const plan = planContent(history);
+  console.log(`Type: ${type} | Category: ${plan.category.id} | Format: ${plan.format.id}`);
 
-  const post = await generatePost(pillar, history);
+  const post = await generatePost(plan, type, history, date);
   console.log(`Topic: ${post.topic}`);
 
   const message = buildMessage(post, date, type);
@@ -43,24 +48,32 @@ async function main() {
     await writeFile(`${config.outDir}/post.png`, media);
   }
 
+  const summary = `${type} | ${plan.category.name} | ${plan.format.name}\n` +
+    `HEADLINE: ${post.headline}\nSUBLINE: ${post.subline}\nPOINTS: ${post.bullets.join(' / ')}\n\n${message}` +
+    (post.sources?.length ? `\n\nSOURCES:\n${post.sources.map(s => `- ${s.title} ${s.url}`).join('\n')}` : '');
+
   if (config.dryRun) {
     console.log(`\nDRY RUN — nothing posted. Preview files are in ${config.outDir}/\n`);
-    console.log(message);
+    console.log(summary);
+    annotate('notice', 'Dry run preview', summary);
     return;
   }
 
   const postId = type === 'reel' ? await postReel(media, message) : await postPhoto(media, message);
-  console.log(`Posted ${type} to Facebook: ${postId}`);
+  const url = type === 'reel' ? `https://www.facebook.com/reel/${postId}` : `https://www.facebook.com/${postId}`;
+  console.log(`Posted ${type} to Facebook: ${url}`);
+  annotate('notice', 'Published', `${url}\n\n${summary}`);
 
-  history.push({ date, type, pillar: pillar.id, topic: post.topic, headline: post.headline, postId });
+  history.push({
+    date, type, platform: 'facebook', pillar: plan.category.id, format: plan.format.id,
+    topic: post.topic, headline: post.headline, postId, url,
+    ...(post.sources?.length ? { sources: post.sources.map(s => s.url).slice(0, 3) } : {}),
+  });
   await saveHistory(history);
 }
 
 main().catch(err => {
   console.error(err);
-  if (process.env.GITHUB_ACTIONS) {
-    const msg = String((err as Error)?.message ?? err).replace(/\r?\n/g, ' ').slice(0, 900);
-    console.log(`::error title=Agent failed::${msg}`);
-  }
+  annotate('error', 'Agent failed — nothing was published', String((err as Error)?.message ?? err));
   process.exit(1);
 });
