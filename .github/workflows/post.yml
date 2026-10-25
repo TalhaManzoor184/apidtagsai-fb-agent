@@ -20,6 +20,11 @@ on:
         type: choice
         options: ['', instagram-tags, tiktok-tags, youtube-tags, video-ideas, youtube-descriptions, seo-titles, trending-ideas, seo-checker, seo-blogs]
         default: ''
+      platforms:
+        description: 'Where to publish (pinterest = test Pinterest only, history untouched)'
+        type: choice
+        options: [all, facebook, pinterest]
+        default: all
 
 permissions:
   contents: write   # to commit data/history.json back
@@ -50,6 +55,7 @@ jobs:
           POST_TYPE: ${{ inputs.post_type || vars.POST_TYPE || 'auto' }}
           MUSIC: ${{ vars.MUSIC || 'auto' }}
           CATEGORY: ${{ inputs.category }}
+          PLATFORMS: ${{ inputs.platforms || 'all' }}
           SEO_CHECKER_LIVE: ${{ vars.SEO_CHECKER_LIVE }}
           IMAGE_MODE: ${{ vars.IMAGE_MODE || 'template' }}
           POST_LANGUAGE: ${{ vars.POST_LANGUAGE || 'English' }}
@@ -59,6 +65,12 @@ jobs:
           FB_GRAPH_VERSION: ${{ vars.FB_GRAPH_VERSION }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PINTEREST_APP_ID: ${{ secrets.PINTEREST_APP_ID }}
+          PINTEREST_APP_SECRET: ${{ secrets.PINTEREST_APP_SECRET }}
+          PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
+          PINTEREST_TOKEN_KEY: ${{ secrets.PINTEREST_TOKEN_KEY }}
+          PINTEREST_BOARD_ID: ${{ vars.PINTEREST_BOARD_ID }}
+          PINTEREST_ENV: ${{ vars.PINTEREST_ENV || 'sandbox' }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
 
@@ -71,9 +83,9 @@ jobs:
           if-no-files-found: ignore
 
       - name: Save post history
-        if: success()
+        if: success() || failure()
         run: |
           git config user.name "fb-agent-bot"
           git config user.email "fb-agent-bot@users.noreply.github.com"
-          git add data/history.json
-          git diff --staged --quiet || (git commit -m "chore: post history [skip ci]" && git push)
+          git add data/history.json $( [ -f data/pinterest-token.enc ] && echo data/pinterest-token.enc )
+          git diff --staged --quiet || (git commit -m "chore: post history [skip ci]" && git pull --rebase -q && git push)

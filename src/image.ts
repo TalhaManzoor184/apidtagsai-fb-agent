@@ -19,7 +19,8 @@ export type Node = { type: string; props: Record<string, any> };
 export const h = (type: string, style: Record<string, any>, children?: any, extra: Record<string, any> = {}): Node =>
   ({ type, props: { style, children, ...extra } });
 
-function layout(post: Post, bgDataUri?: string): Node {
+function layout(post: Post, bgDataUri?: string, W = 1080, H = 1080): Node {
+  const tall = H > W * 1.2;
   const domain = new URL(config.siteUrl).hostname;
   const bullets = post.bullets.map((b, i) =>
     h('div', { display: 'flex', alignItems: 'center', gap: 22, padding: '20px 26px', background: C.card,
@@ -55,13 +56,13 @@ function layout(post: Post, bgDataUri?: string): Node {
           [h('div', { display: 'flex' }, '#'), h('div', { display: 'flex' }, config.brandName)]),
       ]),
       // Headline + subline
-      h('div', { display: 'flex', flexDirection: 'column', marginTop: bgDataUri ? 'auto' : 64, gap: 22 }, [
-        h('div', { display: 'flex', fontSize: post.headline.length > 34 ? 72 : 86, fontWeight: 800, lineHeight: 1.05,
+      h('div', { display: 'flex', flexDirection: 'column', marginTop: bgDataUri ? 'auto' : tall ? 140 : 64, gap: 22 }, [
+        h('div', { display: 'flex', fontSize: (post.headline.length > 34 ? 72 : 86) * (tall ? 1.1 : 1), fontWeight: 800, lineHeight: 1.05,
           letterSpacing: -2 }, post.headline),
         h('div', { display: 'flex', fontSize: 33, fontWeight: 400, color: C.muted, lineHeight: 1.35 }, post.subline),
       ]),
       // Bullets
-      h('div', { display: 'flex', flexDirection: 'column', gap: 16, marginTop: 44 }, bullets),
+      h('div', { display: 'flex', flexDirection: 'column', gap: tall ? 22 : 16, marginTop: tall ? 70 : 44 }, bullets),
       // Footer
       h('div', { display: 'flex', marginTop: 'auto', paddingTop: 36, justifyContent: 'space-between', alignItems: 'center' }, [
         h('div', { display: 'flex', fontSize: 26, color: C.muted }, 'Free AI tools for creators'),
@@ -105,8 +106,11 @@ export async function loadFonts(): Promise<any[]> {
   ]);
 }
 
-export async function renderImage(post: Post): Promise<Buffer> {
+export async function renderImage(post: Post, w = W, h = H): Promise<Buffer> {
   const bg = config.imageMode === 'gemini' && !config.mockLlm ? await geminiBackground(post.imagePrompt) : undefined;
-  const svg = await satori(layout(post, bg) as any, { width: W, height: H, fonts: await loadFonts() });
-  return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
+  const svg = await satori(layout(post, bg, w, h) as any, { width: w, height: h, fonts: await loadFonts() });
+  return new Resvg(svg, { fitTo: { mode: 'width', value: w } }).render().asPng();
 }
+
+/** Pinterest-friendly 2:3 version of the image card. */
+export const renderPinImage = (post: Post) => renderImage(post, 1000, 1500);

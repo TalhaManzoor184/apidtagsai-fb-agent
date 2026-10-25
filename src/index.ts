@@ -1,7 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { config } from './config.js';
-import { buildMessage, generatePost, planContent, type PostType } from './content.js';
-import { renderImage } from './image.js';
+import { buildMessage, generatePost, planContent, trackedUrl, type PostType } from './content.js';
+import { renderImage, renderPinImage } from './image.js';
+import { pinterestConfigured, pinterestEnv, publishPin, type PinResult } from './pinterest.js';
 import { renderReel, renderReelStill } from './reel.js';
 import { postPhoto, postReel } from './facebook.js';
 import { loadHistory, saveHistory, type HistoryEntry } from './history.js';
@@ -15,7 +16,7 @@ function resolvePostType(history: HistoryEntry[]): PostType {
 }
 
 /** GitHub Actions annotation (shows on the run summary page). */
-function annotate(level: 'notice' | 'error', title: string, msg: string) {
+function annotate(level: 'notice' | 'warning' | 'error', title: string, msg: string) {
   if (!process.env.GITHUB_ACTIONS) return;
   const esc = msg.slice(0, 3500).replace(/%/g, '%25').replace(/\r/g, '').replace(/\n/g, '%0A');
   console.log(`::${level} title=${title}::${esc}`);
@@ -23,6 +24,11 @@ function annotate(level: 'notice' | 'error', title: string, msg: string) {
 
 async function main() {
   const date = new Date().toISOString().slice(0, 10);
+  // PLATFORMS=all (default) | facebook | pinterest  (pinterest-only runs are for testing and don't touch history)
+  const platforms = (process.env.PLATFORMS || 'all').trim().toLowerCase();
+  const toFacebook = platforms !== 'pinterest';
+  const toPinterest = platforms !== 'facebook' && pinterestConfigured();
+  if (platforms !== 'facebook' && !toPinterest) console.log('Pinterest not configured; skipping.');
   const history = await loadHistory();
 
   const type = resolvePostType(history);
@@ -48,9 +54,19 @@ async function main() {
     await writeFile(`${config.outDir}/post.png`, media);
   }
 
+  // Pinterest assets: 2:3 image (or the reel + a cover frame from the hook scene)
+  let pinImage: Buffer | undefined, pinCover: Buffer | undefined;
+  const pinLink = trackedUrl(post, date, type, 'pinterest');
+  if (toPinterest || config.dryRun) {
+    pinImage = await renderPinImage(post);
+    await writeFile(`${config.outDir}/pin.png`, pinImage);
+    if (type === 'reel') pinCover = await renderReelStill(post, 2.5);
+  }
+
   const summary = `${type} | ${plan.category.name} | ${plan.format.name}\n` +
     `HEADLINE: ${post.headline}\nSUBLINE: ${post.subline}\nPOINTS: ${post.bullets.join(' / ')}\n\n${message}` +
-    (post.sources?.length ? `\n\nSOURCES:\n${post.sources.map(s => `- ${s.title} ${s.url}`).join('\n')}` : '');
+    (post.sources?.length ? `\n\nSOURCES:\n${post.sources.map(s => `- ${s.title} ${s.url}`).join('\n')}` : '') +
+    `\n\nPINTEREST (${pinterestEnv()}): ${post.pinTitle}\n${post.pinDescription}\n${pinLink}`;
 
   if (config.dryRun) {
     console.log(`\nDRY RUN — nothing posted. Preview files are in ${config.outDir}/\n`);
@@ -59,15 +75,39 @@ async function main() {
     return;
   }
 
-  const postId = type === 'reel' ? await postReel(media, message) : await postPhoto(media, message);
-  const url = type === 'reel' ? `https://www.facebook.com/reel/${postId}` : `https://www.facebook.com/${postId}`;
-  console.log(`Posted ${type} to Facebook: ${url}`);
-  annotate('notice', 'Published', `${url}\n\n${summary}`);
+  let postId: string | undefined, url: string | undefined;
+  if (toFacebook) {
+    postId = type === 'reel' ? await postReel(media, message) : await postPhoto(media, message);
+    url = type === 'reel' ? `https://www.facebook.com/reel/${postId}` : `https://www.facebook.com/${postId}`;
+    console.log(`Posted ${type} to Facebook: ${url}`);
+    annotate('notice', 'Published to Facebook', `${url}\n\n${summary}`);
+  }
 
+  // Pinterest never fails the run: Facebook is already live at this point
+  let pin: PinResult | undefined, pinError: string | undefined;
+  if (toPinterest) {
+    try {
+      pin = await publishPin({
+        title: post.pinTitle, description: post.pinDescription, link: pinLink,
+        altText: `${post.headline}. ${post.subline}`,
+        image: pinImage, video: type === 'reel' ? media : undefined, cover: pinCover,
+      });
+      console.log(`Pinned (${pin.kind}, ${pin.env}): ${pin.url}`);
+      annotate(pin.note ? 'warning' : 'notice', `Published to Pinterest (${pin.env})`, `${pin.url}${pin.note ? `\n${pin.note}` : ''}`);
+    } catch (e) {
+      pinError = (e as Error).message;
+      console.error(`Pinterest failed: ${pinError}`);
+      annotate('warning', 'Pinterest failed (Facebook post is unaffected)', pinError);
+    }
+  }
+
+  if (!toFacebook) return; // test runs don't change rotation/history
   history.push({
     date, type, platform: 'facebook', pillar: plan.category.id, format: plan.format.id,
     topic: post.topic, headline: post.headline, postId, url,
     ...(post.sources?.length ? { sources: post.sources.map(s => s.url).slice(0, 3) } : {}),
+    ...(pin ? { pinterest: { id: pin.id, url: pin.url, kind: pin.kind, env: pin.env } } : {}),
+    ...(pinError ? { pinterestError: pinError.slice(0, 300) } : {}),
   });
   await saveHistory(history);
 }

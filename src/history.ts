@@ -13,6 +13,8 @@ export interface HistoryEntry {
   postId?: string;
   url?: string;
   sources?: string[];
+  pinterest?: { id: string; url: string; kind: string; env: string };
+  pinterestError?: string;
 }
 
 export async function loadHistory(): Promise<HistoryEntry[]> {

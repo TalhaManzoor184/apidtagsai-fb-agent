@@ -1,4 +1,4 @@
-# RapidTagsAI Facebook Agent
+# RapidTagsAI Social Agent (Facebook + Pinterest)
 
 Har roz automatically Facebook Page par ek SEO / hashtag post karta hai — AI se caption, aur rapidtagsai.com ka UTM-tracked link. Ek din branded 1080×1080 image post, agle din 20 second ka animated 1080×1920 Reel (hook → 3 tip scenes → CTA).
 
@@ -61,8 +61,28 @@ Notes
 - Music: each reel gets an original generated track (`src/music.ts`: seeded key/tempo/chords, pads + arp + bass + drums, ~−14 LUFS), so no copyright claims. Put licensed tracks in `assets/music/` to use those instead; `MUSIC=off` for silence.
 - Local preview: `npm run mock` (set `POST_TYPE=reel` in `.env`) → `out/reel.mp4` + `out/reel-preview.png`.
 
+## Pinterest (after Facebook)
+
+Every run that posts to Facebook also creates a Pin with its own Pinterest title/description and a `utm_source=pinterest` link:
+image days → 1000×1500 image Pin; reel days → video Pin (cover = hook frame), falling back to the image Pin if video fails.
+Pinterest errors never fail the run (shown as a warning; recorded as `pinterestError` in history).
+
+**Access levels:** new apps get *Trial* access → use `PINTEREST_ENV=sandbox` (Pins visible only to you). After *Standard* access is approved, switch to `production` and re-run the auth script (sandbox and production have separate tokens and boards).
+
+Setup:
+1. Pinterest **Business** account → [developers.pinterest.com](https://developers.pinterest.com) → **Connect app** (needs a privacy policy URL) → wait for Trial access.
+2. In the app settings add redirect URI `http://localhost:8085/`.
+3. Locally: put `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET` (and `PINTEREST_ENV`) in `.env`, then `npm run pinterest:auth` → log in → it prints the secrets/variables to add (creates the board *Creator SEO Tips by RapidTagsAI* if needed; `-- --board "Name"` to choose).
+4. GitHub: Secrets `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET`, `PINTEREST_REFRESH_TOKEN`, `PINTEREST_TOKEN_KEY`; Variables `PINTEREST_BOARD_ID`, `PINTEREST_ENV`.
+5. Test: **Run workflow** → `dry_run` off, `platforms = pinterest` (doesn't touch Facebook or history).
+
+Tokens: Pinterest rotates the refresh token on every refresh (~60-day life). The agent stores the newest one AES-256-GCM encrypted in `data/pinterest-token.enc` (key = `PINTEREST_TOKEN_KEY`) and commits it, so daily runs keep it alive. If it ever lapses (e.g. no runs for 60 days), run `npm run pinterest:auth` again and update `PINTEREST_REFRESH_TOKEN`.
+
+**Standard access request:** screen-record `npm run pinterest:auth` (browser login + consent + the API calls printed in the terminal; hide the secrets) and upload it with the request in *My apps → Upgrade*.
+
 ## Customise
 
 - Categories, calendar, formats, CTAs, voice and rules: `src/guide.ts`.
 - Test a category: **Run workflow** → *category* dropdown.
+- Pinterest copy: `pinTitle` / `pinDescription` instructions in `src/content.ts`; Pin image layout = `renderPinImage` in `src/image.ts`.
 - Design: colors (`C`) and layout in `src/image.ts`; reel timeline/animation in `src/reel.ts` (`SCENES` timeline, scene functions).

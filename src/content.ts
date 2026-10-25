@@ -19,6 +19,8 @@ export interface Post {
   cta: string;           // category CTA (reel end card)
   caption: string;       // FB post body (no URL, no hashtags)
   hashtags: string[];    // without '#'
+  pinTitle: string;      // Pinterest title (≤100)
+  pinDescription: string; // Pinterest description (≤500, keyword-rich, no URL)
   imagePrompt: string;   // used only in IMAGE_MODE=gemini
   sources?: Source[];    // research sources (trending category)
 }
@@ -92,6 +94,8 @@ Return JSON with exactly these keys:
   "details": ["exactly 3 items, each max 85 characters: one concrete supporting sentence for the matching bullet"],
   "caption": "the Facebook caption",
   "hashtags": ["3-7 highly relevant hashtags without #, no unrelated trending tags"],
+  "pinTitle": "Pinterest Pin title, max 90 characters, search-friendly (what people would type into Pinterest search), not identical to headline",
+  "pinDescription": "Pinterest description, 200-450 characters: different wording from the Facebook caption, natural keywords, what the reader will learn, ends with the CTA; no URL, no emojis, at most 3 hashtags at the end",
   "imagePrompt": "clean modern background illustration for this topic, NO text, NO logos"
 }`;
 }
@@ -130,6 +134,8 @@ function validate(raw: any, plan: Plan, sources?: Source[]): Post {
     cta: plan.category.cta,
     caption: String(raw.caption ?? '').replace(/https?:\/\/\S+/g, '').replace(/(^|\s)#[\p{L}\p{N}_]+/gu, '$1').trim(),
     hashtags: ['RapidTagsAI', ...new Set(hashtags)].slice(0, 8),
+    pinTitle: clamp(raw.pinTitle || raw.headline, 100),
+    pinDescription: clamp(String(raw.pinDescription || raw.subline || '').replace(/https?:\/\/\S+/g, '').trim(), 500),
     imagePrompt: String(raw.imagePrompt ?? ''),
     ...(sources?.length ? { sources: sources.slice(0, 5) } : {}),
   };
@@ -170,6 +176,15 @@ export async function generatePost(plan: Plan, type: PostType, history: HistoryE
 }
 
 /** Final Facebook message: caption + tracked link + hashtags. */
+export function trackedUrl(post: Post, date: string, type: PostType, source: 'facebook' | 'pinterest'): string {
+  const url = new URL(config.siteUrl);
+  url.searchParams.set('utm_source', source);
+  url.searchParams.set('utm_medium', 'social');
+  url.searchParams.set('utm_campaign', `autopost_${post.pillar}`);
+  url.searchParams.set('utm_content', `${type}_${post.format}_${date}`);
+  return url.toString();
+}
+
 export function buildMessage(post: Post, date: string, type: PostType = 'photo'): string {
   const url = new URL(config.siteUrl);
   url.searchParams.set('utm_source', 'facebook');
@@ -188,5 +203,7 @@ const MOCK = {
   details: ['Describe the topic of this Reel, not your mood or the day.', 'One wide tag for reach, two to four niche tags for the right viewers.', 'Engagement-bait tags attract the wrong audience and add no context.'],
   caption: "Still pasting 30 hashtags under every Reel? 🤔\n\nInstagram uses hashtags mainly to understand what your content is about. A short list of specific, relevant tags gives a clearer signal than a wall of generic ones.\n\n✅ Describe the topic, not your mood\n✅ Combine 1 broad tag with 2-4 niche tags\n✅ Rotate sets per post instead of copy-pasting\n\nHow many hashtags do you use right now?\n\nTry the free tools at RapidTagsAI.com.",
   hashtags: ['InstagramTips', 'ReelsTips', 'HashtagStrategy', 'ContentCreator'],
+  pinTitle: 'Instagram Hashtag Strategy: How Many Hashtags to Use on Reels',
+  pinDescription: 'Learn why a short set of specific hashtags works better than 30 generic ones on Instagram Reels. Use one broad tag plus a few niche tags that describe your content, and skip engagement-bait tags. Try the free tools at RapidTagsAI.com. #InstagramTips #HashtagStrategy',
   imagePrompt: 'Minimal 3D illustration of a smartphone with floating hashtag symbols, purple and blue gradient, soft lighting',
 };

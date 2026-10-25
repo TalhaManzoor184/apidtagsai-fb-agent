@@ -9,7 +9,8 @@
     "dry": "cross-env DRY_RUN=true tsx src/index.ts",
     "mock": "cross-env DRY_RUN=true MOCK_LLM=true tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "post": "cross-env DRY_RUN=false tsx src/index.ts"
+    "post": "cross-env DRY_RUN=false tsx src/index.ts",
+    "pinterest:auth": "tsx scripts/pinterest-auth.ts"
   },
   "engines": {
     "node": ">=20"
