@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
@@ -6,7 +7,8 @@ import { dirname } from 'node:path';
  * Pinterest API v5 publishing.
  * - PINTEREST_ENV=sandbox (Trial access: Pins visible only to you) | production (Standard access: public)
  * - Refresh tokens rotate on every refresh (continuous refresh, ~60 days), so the newest one is stored
- *   AES-256-GCM encrypted in data/pinterest-token.enc (key = PINTEREST_TOKEN_KEY) and committed by the workflow.
+ *   AES-256-GCM encrypted in data/pinterest-token.enc (key = PINTEREST_TOKEN_KEY, or derived from the app secret)
+ *   together with the board id, and committed by the workflow.
  */
 
 const env = (k: string) => process.env[k]?.trim() || undefined;
@@ -16,15 +18,29 @@ export const pinterestEnv = () => (env('PINTEREST_ENV') === 'production' ? 'prod
 export const apiBase = (e = pinterestEnv()) =>
   env('PINTEREST_API_BASE') ?? (e === 'production' ? 'https://api.pinterest.com/v5' : 'https://api-sandbox.pinterest.com/v5');
 
+export const redirectUri = () => env('PINTEREST_REDIRECT_URI') ?? 'https://rapidtagsai.com/';
+const SCOPES = 'boards:read,boards:write,pins:read,pins:write,user_accounts:read';
+const DEFAULT_BOARD = 'Creator SEO Tips by RapidTagsAI';
+
+export const hasAppCredentials = () => Boolean(env('PINTEREST_APP_ID') && env('PINTEREST_APP_SECRET'));
+
+/** App credentials + a token (secret or stored file). Board comes from PINTEREST_BOARD_ID or the stored file. */
 export function pinterestConfigured(): boolean {
-  return Boolean(env('PINTEREST_APP_ID') && env('PINTEREST_APP_SECRET') && env('PINTEREST_BOARD_ID') && env('PINTEREST_TOKEN_KEY')
-    && (env('PINTEREST_REFRESH_TOKEN')));
+  return hasAppCredentials() && Boolean(env('PINTEREST_REFRESH_TOKEN') || existsSync(TOKEN_FILE));
+}
+
+export function authorizeUrl(): string {
+  return `https://www.pinterest.com/oauth/?${new URLSearchParams({
+    client_id: env('PINTEREST_APP_ID') ?? '', redirect_uri: redirectUri(), response_type: 'code', scope: SCOPES, state: 'rapidtagsai',
+  })}`;
 }
 
 // ---------- encrypted token store ----------
-const keyOf = () => createHash('sha256').update(env('PINTEREST_TOKEN_KEY') ?? '').digest();
+const keyOf = () => createHash('sha256').update(env('PINTEREST_TOKEN_KEY') ?? `pinterest-token:${env('PINTEREST_APP_SECRET') ?? ''}`).digest();
 
-async function loadStoredRefresh(): Promise<{ token: string; env: string } | undefined> {
+interface Stored { token: string; env: string; boardId?: string; boardName?: string }
+
+async function loadStoredRefresh(): Promise<Stored | undefined> {
   try {
     const box = JSON.parse(await readFile(TOKEN_FILE, 'utf8'));
     const d = createDecipheriv('aes-256-gcm', keyOf(), Buffer.from(box.iv, 'base64'));
@@ -36,10 +52,12 @@ async function loadStoredRefresh(): Promise<{ token: string; env: string } | und
   }
 }
 
-async function storeRefresh(token: string): Promise<void> {
+async function storeRefresh(token: string, board?: { id: string; name: string }): Promise<void> {
+  const prev = await loadStoredRefresh();
   const iv = randomBytes(12);
   const c = createCipheriv('aes-256-gcm', keyOf(), iv);
-  const data = Buffer.concat([c.update(JSON.stringify({ token, env: pinterestEnv(), saved: new Date().toISOString() }), 'utf8'), c.final()]);
+  const payload = { token, env: pinterestEnv(), boardId: board?.id ?? prev?.boardId, boardName: board?.name ?? prev?.boardName, saved: new Date().toISOString() };
+  const data = Buffer.concat([c.update(JSON.stringify(payload), 'utf8'), c.final()]);
   await mkdir(dirname(TOKEN_FILE), { recursive: true });
   await writeFile(TOKEN_FILE, JSON.stringify({ iv: iv.toString('base64'), tag: c.getAuthTag().toString('base64'), data: data.toString('base64') }) + '\n');
 }
@@ -88,12 +106,18 @@ export interface PinInput {
 
 export interface PinResult { id: string; url: string; kind: 'image' | 'video'; env: string; note?: string }
 
+async function boardId(): Promise<string> {
+  const id = env('PINTEREST_BOARD_ID') ?? (await loadStoredRefresh())?.boardId;
+  if (!id) throw new Error('No Pinterest board id (set PINTEREST_BOARD_ID or run the auth code exchange)');
+  return id;
+}
+
 async function createPin(token: string, mediaSource: Record<string, unknown>, p: PinInput): Promise<string> {
   const json = await parse(await fetch(`${apiBase()}/pins`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      board_id: env('PINTEREST_BOARD_ID'),
+      board_id: await boardId(),
       title: p.title.slice(0, 100),
       description: p.description.slice(0, 800),
       link: p.link,
@@ -153,4 +177,30 @@ export async function publishPin(p: PinInput): Promise<PinResult> {
   if (!p.image) throw new Error('publishPin needs an image or a video');
   const id = await createPin(token, { source_type: 'image_base64', content_type: 'image/png', data: p.image.toString('base64') }, p);
   return { id, url: pinUrl(id), kind: 'image', env: e };
+}
+
+/**
+ * One-time setup from GitHub: exchanges the ?code=... from the Pinterest consent redirect for tokens,
+ * picks or creates the board, and stores both (encrypted) in data/pinterest-token.enc.
+ */
+export async function exchangeAuthCode(code: string): Promise<{ username: string; board: { id: string; name: string }; boards: string[] }> {
+  const tok = await parse(await fetch(`${apiBase()}/oauth/token`, {
+    method: 'POST',
+    headers: { Authorization: basicAuth(), 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri(), continuous_refresh: 'true' }),
+  }), 'code exchange');
+  const auth = { Authorization: `Bearer ${tok.access_token}`, 'Content-Type': 'application/json' };
+  const me = await parse(await fetch(`${apiBase()}/user_account`, { headers: auth }), 'user account');
+  const items: any[] = (await parse(await fetch(`${apiBase()}/boards?page_size=100`, { headers: auth }), 'list boards')).items ?? [];
+  const wanted = env('PINTEREST_BOARD_NAME') ?? DEFAULT_BOARD;
+  let b = items.find(x => String(x.name).toLowerCase() === wanted.toLowerCase());
+  if (!b) {
+    b = await parse(await fetch(`${apiBase()}/boards`, {
+      method: 'POST', headers: auth,
+      body: JSON.stringify({ name: wanted, description: 'Free tips on YouTube, TikTok and Instagram tags, titles, descriptions and SEO.', privacy: 'PUBLIC' }),
+    }), 'create board');
+  }
+  const board = { id: String(b.id), name: String(b.name) };
+  await storeRefresh(tok.refresh_token, board);
+  return { username: me.username, board, boards: items.map(x => `${x.id} ${x.name}`) };
 }

@@ -69,7 +69,13 @@ Pinterest errors never fail the run (shown as a warning; recorded as `pinterestE
 
 **Access levels:** new apps get *Trial* access → use `PINTEREST_ENV=sandbox` (Pins visible only to you). After *Standard* access is approved, switch to `production` and re-run the auth script (sandbox and production have separate tokens and boards).
 
-Setup:
+Setup from GitHub only (no local script):
+1. Add Secrets `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET`; add `https://rapidtagsai.com/` as a redirect URI in the Pinterest app.
+2. **Run workflow** with `platforms = pinterest` (dry run) → the run summary shows a Pinterest login link.
+3. Open it, click **Allow**, copy the `code=...` from the address bar on rapidtagsai.com.
+4. **Run workflow** again with that value in `pinterest_code` → token + board (*Creator SEO Tips by RapidTagsAI*) are saved encrypted in `data/pinterest-token.enc`.
+
+Alternative local setup:
 1. Pinterest **Business** account → [developers.pinterest.com](https://developers.pinterest.com) → **Connect app** (needs a privacy policy URL) → wait for Trial access.
 2. In the app settings add redirect URI `http://localhost:8085/`.
 3. Locally: put `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET` (and `PINTEREST_ENV`) in `.env`, then `npm run pinterest:auth` → log in → it prints the secrets/variables to add (creates the board *Creator SEO Tips by RapidTagsAI* if needed; `-- --board "Name"` to choose).

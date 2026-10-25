@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { config } from './config.js';
 import { buildMessage, generatePost, planContent, trackedUrl, type PostType } from './content.js';
 import { renderImage, renderPinImage } from './image.js';
-import { pinterestConfigured, pinterestEnv, publishPin, type PinResult } from './pinterest.js';
+import { authorizeUrl, exchangeAuthCode, hasAppCredentials, pinterestConfigured, pinterestEnv, publishPin, redirectUri, type PinResult } from './pinterest.js';
 import { renderReel, renderReelStill } from './reel.js';
 import { postPhoto, postReel } from './facebook.js';
 import { loadHistory, saveHistory, type HistoryEntry } from './history.js';
@@ -22,13 +22,30 @@ function annotate(level: 'notice' | 'warning' | 'error', title: string, msg: str
   console.log(`::${level} title=${title}::${esc}`);
 }
 
+async function pinterestSetup(code: string) {
+  // Accept either the bare code or the whole redirected URL
+  const c = code.includes('code=') ? new URL(code.startsWith('http') ? code : `https://x/?${code.split('?').pop()}`).searchParams.get('code') ?? code : code;
+  const r = await exchangeAuthCode(c);
+  const msg = `Connected Pinterest (${pinterestEnv()}) as ${r.username}.\nBoard: ${r.board.name} (${r.board.id})\nToken saved encrypted in data/pinterest-token.enc.`;
+  console.log(msg);
+  annotate('notice', 'Pinterest connected', msg);
+}
+
 async function main() {
   const date = new Date().toISOString().slice(0, 10);
+  const authCode = process.env.PINTEREST_AUTH_CODE?.trim();
+  if (authCode) return pinterestSetup(authCode);
   // PLATFORMS=all (default) | facebook | pinterest  (pinterest-only runs are for testing and don't touch history)
   const platforms = (process.env.PLATFORMS || 'all').trim().toLowerCase();
   const toFacebook = platforms !== 'pinterest';
   const toPinterest = platforms !== 'facebook' && pinterestConfigured();
-  if (platforms !== 'facebook' && !toPinterest) console.log('Pinterest not configured; skipping.');
+  if (platforms !== 'facebook' && !toPinterest) {
+    console.log('Pinterest not configured; skipping.');
+    if (hasAppCredentials()) {
+      annotate('notice', 'Pinterest: connect your account',
+        `Open this link, log in and click Allow:\n${authorizeUrl()}\n\nYou will land on ${redirectUri()}?code=... — run the workflow again with that code in "pinterest_code".`);
+    }
+  }
   const history = await loadHistory();
 
   const type = resolvePostType(history);

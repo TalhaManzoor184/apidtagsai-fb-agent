@@ -25,6 +25,10 @@ on:
         type: choice
         options: [all, facebook, pinterest]
         default: all
+      pinterest_code:
+        description: 'One-time Pinterest setup: paste the code (or full URL) after clicking Allow'
+        type: string
+        default: ''
 
 permissions:
   contents: write   # to commit data/history.json back
@@ -71,6 +75,9 @@ jobs:
           PINTEREST_TOKEN_KEY: ${{ secrets.PINTEREST_TOKEN_KEY }}
           PINTEREST_BOARD_ID: ${{ vars.PINTEREST_BOARD_ID }}
           PINTEREST_ENV: ${{ vars.PINTEREST_ENV || 'sandbox' }}
+          PINTEREST_AUTH_CODE: ${{ inputs.pinterest_code }}
+          PINTEREST_REDIRECT_URI: ${{ vars.PINTEREST_REDIRECT_URI }}
+          PINTEREST_BOARD_NAME: ${{ vars.PINTEREST_BOARD_NAME }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
 
