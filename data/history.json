@@ -42,5 +42,22 @@
     "headline": "Plan Seasonal Videos Before Search Peaks",
     "postId": "1091806873654775",
     "url": "https://www.facebook.com/reel/1091806873654775"
+  },
+  {
+    "date": "2026-10-25",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "seo-checker",
+    "format": "soft-promo",
+    "topic": "Fixing missing meta descriptions and title tags to improve click-through rates in search results",
+    "headline": "Fix Common SEO Mistakes",
+    "postId": "651441308365152_1697979109007492",
+    "url": "https://www.facebook.com/651441308365152_1697979109007492",
+    "pinterest": {
+      "id": "1115977982701296314",
+      "url": "https://www.pinterest.com/pin/1115977982701296314/",
+      "kind": "image",
+      "env": "sandbox"
+    }
   }
 ]
