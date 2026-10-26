@@ -59,5 +59,22 @@
       "kind": "image",
       "env": "sandbox"
     }
+  },
+  {
+    "date": "2026-10-26",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "tiktok-tags",
+    "format": "step-by-step",
+    "topic": "A 3-step method for creators to match TikTok hashtags directly to video script audio and visuals.",
+    "headline": "Match TikTok Tags to Your Video",
+    "postId": "2555258484900693",
+    "url": "https://www.facebook.com/reel/2555258484900693",
+    "pinterest": {
+      "id": "1115977982701399733",
+      "url": "https://www.pinterest.com/pin/1115977982701399733/",
+      "kind": "video",
+      "env": "sandbox"
+    }
   }
 ]
