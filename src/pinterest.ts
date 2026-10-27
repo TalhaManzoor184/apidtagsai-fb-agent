@@ -21,6 +21,8 @@ export const apiBase = (e = pinterestEnv()) =>
 export const redirectUri = () => env('PINTEREST_REDIRECT_URI') ?? 'https://rapidtagsai.com/';
 const SCOPES = 'boards:read,boards:write,pins:read,pins:write,user_accounts:read';
 const DEFAULT_BOARD = 'Creator SEO Tips by RapidTagsAI';
+const PRODUCTION_BOARD = 'SEO & Hashtag Tips for Creators | RapidTagsAI';
+let currentRefresh: string | undefined;
 
 export const hasAppCredentials = () => Boolean(env('PINTEREST_APP_ID') && env('PINTEREST_APP_SECRET'));
 
@@ -88,7 +90,8 @@ async function accessToken(): Promise<string> {
         headers: { Authorization: basicAuth(), 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refresh }),
       }), 'token refresh');
-      await storeRefresh(json.refresh_token ?? refresh);
+      currentRefresh = json.refresh_token ?? refresh;
+      await storeRefresh(currentRefresh!);
       return json.access_token;
     } catch (e) {
       lastErr = e;
@@ -115,12 +118,37 @@ async function boardId(): Promise<string> {
   return id;
 }
 
+/** Finds (or creates) a board by name in the current environment and remembers it with the token. */
+async function useBoardNamed(token: string, name: string): Promise<string> {
+  const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const items: any[] = (await parse(await fetch(`${apiBase()}/boards?page_size=100`, { headers: auth }), 'list boards')).items ?? [];
+  let b = items.find(x => String(x.name).toLowerCase() === name.toLowerCase());
+  b ??= await parse(await fetch(`${apiBase()}/boards`, {
+    method: 'POST', headers: auth,
+    body: JSON.stringify({ name, description: 'Free tips on YouTube, TikTok and Instagram tags, titles, descriptions and SEO.', privacy: 'PUBLIC' }),
+  }), 'create board');
+  if (currentRefresh) await storeRefresh(currentRefresh, { id: String(b.id), name: String(b.name) });
+  console.log(`Using Pinterest board: ${b.name} (${b.id})`);
+  return String(b.id);
+}
+
 async function createPin(token: string, mediaSource: Record<string, unknown>, p: PinInput): Promise<string> {
+  try {
+    return await createPinOn(token, await boardId(), mediaSource, p);
+  } catch (e) {
+    // A board created during Trial (sandbox) can't hold production Pins: switch to a production board once.
+    if (!/sandbox boards|code 15\b/i.test((e as Error).message) || env('PINTEREST_BOARD_ID')) throw e;
+    const id = await useBoardNamed(token, env('PINTEREST_BOARD_NAME') ?? PRODUCTION_BOARD);
+    return createPinOn(token, id, mediaSource, p);
+  }
+}
+
+async function createPinOn(token: string, board: string, mediaSource: Record<string, unknown>, p: PinInput): Promise<string> {
   const json = await parse(await fetch(`${apiBase()}/pins`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      board_id: await boardId(),
+      board_id: board,
       title: p.title.slice(0, 100),
       description: p.description.slice(0, 800),
       link: p.link,
@@ -195,7 +223,7 @@ export async function exchangeAuthCode(code: string): Promise<{ username: string
   const auth = { Authorization: `Bearer ${tok.access_token}`, 'Content-Type': 'application/json' };
   const me = await parse(await fetch(`${apiBase()}/user_account`, { headers: auth }), 'user account');
   const items: any[] = (await parse(await fetch(`${apiBase()}/boards?page_size=100`, { headers: auth }), 'list boards')).items ?? [];
-  const wanted = env('PINTEREST_BOARD_NAME') ?? DEFAULT_BOARD;
+  const wanted = env('PINTEREST_BOARD_NAME') ?? (pinterestEnv() === 'production' ? PRODUCTION_BOARD : DEFAULT_BOARD);
   let b = items.find(x => String(x.name).toLowerCase() === wanted.toLowerCase());
   if (!b) {
     b = await parse(await fetch(`${apiBase()}/boards`, {
