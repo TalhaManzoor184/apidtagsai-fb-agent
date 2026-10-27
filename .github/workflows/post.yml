@@ -74,7 +74,7 @@ jobs:
           PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
           PINTEREST_TOKEN_KEY: ${{ secrets.PINTEREST_TOKEN_KEY }}
           PINTEREST_BOARD_ID: ${{ vars.PINTEREST_BOARD_ID }}
-          PINTEREST_ENV: ${{ vars.PINTEREST_ENV || 'sandbox' }}
+          PINTEREST_ENV: ${{ vars.PINTEREST_ENV || 'production' }}
           PINTEREST_AUTH_CODE: ${{ inputs.pinterest_code }}
           PINTEREST_REDIRECT_URI: ${{ vars.PINTEREST_REDIRECT_URI }}
           PINTEREST_BOARD_NAME: ${{ vars.PINTEREST_BOARD_NAME }}

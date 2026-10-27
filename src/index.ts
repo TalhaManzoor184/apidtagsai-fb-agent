@@ -38,7 +38,7 @@ async function main() {
   // PLATFORMS=all (default) | facebook | pinterest  (pinterest-only runs are for testing and don't touch history)
   const platforms = (process.env.PLATFORMS || 'all').trim().toLowerCase();
   const toFacebook = platforms !== 'pinterest';
-  const toPinterest = platforms !== 'facebook' && pinterestConfigured();
+  const toPinterest = platforms !== 'facebook' && (await pinterestConfigured());
   if (platforms !== 'facebook' && !toPinterest) {
     console.log('Pinterest not configured; skipping.');
     if (hasAppCredentials()) {

@@ -67,6 +67,8 @@ Every run that posts to Facebook also creates a Pin with its own Pinterest title
 image days → 1000×1500 image Pin; reel days → video Pin (cover = hook frame), falling back to the image Pin if video fails.
 Pinterest errors never fail the run (shown as a warning; recorded as `pinterestError` in history).
 
+**Status:** Standard access approved (Oct 2026); the workflow defaults to `PINTEREST_ENV=production`.
+
 **Access levels:** new apps get *Trial* access → use `PINTEREST_ENV=sandbox` (Pins visible only to you). After *Standard* access is approved, switch to `production` and re-run the auth script (sandbox and production have separate tokens and boards).
 
 Setup from GitHub only (no local script):

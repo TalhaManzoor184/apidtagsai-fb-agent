@@ -25,8 +25,11 @@ const DEFAULT_BOARD = 'Creator SEO Tips by RapidTagsAI';
 export const hasAppCredentials = () => Boolean(env('PINTEREST_APP_ID') && env('PINTEREST_APP_SECRET'));
 
 /** App credentials + a token (secret or stored file). Board comes from PINTEREST_BOARD_ID or the stored file. */
-export function pinterestConfigured(): boolean {
-  return hasAppCredentials() && Boolean(env('PINTEREST_REFRESH_TOKEN') || existsSync(TOKEN_FILE));
+/** True when app credentials exist and a token for the CURRENT environment (sandbox/production) is available. */
+export async function pinterestConfigured(): Promise<boolean> {
+  if (!hasAppCredentials()) return false;
+  if (env('PINTEREST_REFRESH_TOKEN')) return true;
+  return existsSync(TOKEN_FILE) && Boolean(await loadStoredRefresh());
 }
 
 export function authorizeUrl(): string {
