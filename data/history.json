@@ -87,5 +87,22 @@
     "headline": "The Truth About YouTube Tags",
     "postId": "651441308365152_1700356562103080",
     "url": "https://www.facebook.com/651441308365152_1700356562103080"
+  },
+  {
+    "date": "2026-10-28",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "video-ideas",
+    "format": "question-challenge",
+    "topic": "A 3-format challenge helping creators launch engaging faceless video concepts without camera gear",
+    "headline": "Stuck on Faceless Video Ideas?",
+    "postId": "1708616677286329",
+    "url": "https://www.facebook.com/reel/1708616677286329",
+    "pinterest": {
+      "id": "1115977982701573307",
+      "url": "https://www.pinterest.com/pin/1115977982701573307/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
