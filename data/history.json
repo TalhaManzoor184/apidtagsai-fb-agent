@@ -104,5 +104,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-10-29",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "seo-titles",
+    "format": "mistakes",
+    "topic": "Three SEO title mistakes YouTubers and bloggers make and how to fix them for better search clarity",
+    "headline": "3 SEO Title Mistakes Costing You Clicks",
+    "postId": "651441308365152_1702976698507733",
+    "url": "https://www.facebook.com/651441308365152_1702976698507733",
+    "pinterest": {
+      "id": "1115977982701663756",
+      "url": "https://www.pinterest.com/pin/1115977982701663756/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
