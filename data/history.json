@@ -121,5 +121,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-10-30",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "trending-ideas",
+    "format": "educational-tip",
+    "topic": "The counter-intuitive tip format for short-form video retention",
+    "headline": "Struggling to Hook Short-Form Viewers?",
+    "postId": "1156371354001175",
+    "url": "https://www.facebook.com/reel/1156371354001175",
+    "pinterest": {
+      "id": "1115977982701746113",
+      "url": "https://www.pinterest.com/pin/1115977982701746113/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
