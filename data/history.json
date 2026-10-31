@@ -138,5 +138,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-10-31",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "seo-blogs",
+    "format": "before-after",
+    "topic": "Before-and-after comparison of generic vs descriptive internal link anchor text",
+    "headline": "Before & After: Internal Link Anchors",
+    "postId": "651441308365152_1705264641612272",
+    "url": "https://www.facebook.com/651441308365152_1705264641612272",
+    "pinterest": {
+      "id": "1115977982701826633",
+      "url": "https://www.pinterest.com/pin/1115977982701826633/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
