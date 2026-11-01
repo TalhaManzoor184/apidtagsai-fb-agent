@@ -155,5 +155,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-01",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "instagram-tags",
+    "format": "tool-demo",
+    "topic": "Tool demonstration showing how creators can use AI to generate targeted Instagram hashtags for specific niches",
+    "headline": "Find Niche Instagram Tags in Seconds",
+    "postId": "1593665778727468",
+    "url": "https://www.facebook.com/reel/1593665778727468",
+    "pinterest": {
+      "id": "1115977982701913143",
+      "url": "https://www.pinterest.com/pin/1115977982701913143/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
