@@ -172,5 +172,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-02",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "tiktok-tags",
+    "format": "checklist",
+    "topic": "A 3-step pre-publish checklist to optimize TikTok hashtags for search intent",
+    "headline": "TikTok Hashtag Pre-Post Checklist",
+    "postId": "651441308365152_1707704468034956",
+    "url": "https://www.facebook.com/651441308365152_1707704468034956",
+    "pinterest": {
+      "id": "1115977982702010295",
+      "url": "https://www.pinterest.com/pin/1115977982702010295/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
