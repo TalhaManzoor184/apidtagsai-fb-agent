@@ -189,5 +189,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-03",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "youtube-tags",
+    "format": "soft-promo",
+    "topic": "Using AI to build targeted long-tail tag sets for cooking tutorial videos",
+    "headline": "Fix Weak YouTube Tags Fast",
+    "postId": "1809394770085597",
+    "url": "https://www.facebook.com/reel/1809394770085597",
+    "pinterest": {
+      "id": "1115977982702084147",
+      "url": "https://www.pinterest.com/pin/1115977982702084147/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
