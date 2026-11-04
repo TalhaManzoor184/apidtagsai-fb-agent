@@ -206,5 +206,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-04",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "video-ideas",
+    "format": "step-by-step",
+    "topic": "A 3-step workflow to turn client FAQs into educational video content",
+    "headline": "Turn 1 Client FAQ Into 3 Videos",
+    "postId": "651441308365152_1709936294478440",
+    "url": "https://www.facebook.com/651441308365152_1709936294478440",
+    "pinterest": {
+      "id": "1115977982702162953",
+      "url": "https://www.pinterest.com/pin/1115977982702162953/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
