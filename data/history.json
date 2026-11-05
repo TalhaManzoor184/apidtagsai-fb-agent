@@ -223,5 +223,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-05",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "youtube-descriptions",
+    "format": "myth-vs-fact",
+    "topic": "Debunking keyword stuffing in YouTube descriptions vs using natural contextual phrases",
+    "headline": "Myth: Keyword blocks help YouTube videos rank.",
+    "postId": "1112986268281540",
+    "url": "https://www.facebook.com/reel/1112986268281540",
+    "pinterest": {
+      "id": "1115977982702243874",
+      "url": "https://www.pinterest.com/pin/1115977982702243874/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
