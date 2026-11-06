@@ -240,5 +240,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-06",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "trending-ideas",
+    "format": "question-challenge",
+    "topic": "Evergreen Beginner vs. Pro comparison format challenge for short-form creators",
+    "headline": "The Beginner vs. Pro Video Challenge",
+    "postId": "651441308365152_1712338917571511",
+    "url": "https://www.facebook.com/651441308365152_1712338917571511",
+    "pinterest": {
+      "id": "1115977982702327012",
+      "url": "https://www.pinterest.com/pin/1115977982702327012/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
