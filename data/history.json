@@ -257,5 +257,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-07",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "seo-checker",
+    "format": "mistakes",
+    "topic": "Three technical SEO mistakes that hurt site performance and crawlability, with exact fixes",
+    "headline": "3 Technical SEO Mistakes Slowing You Down",
+    "postId": "1573071387912180",
+    "url": "https://www.facebook.com/reel/1573071387912180",
+    "pinterest": {
+      "id": "1115977982702412198",
+      "url": "https://www.pinterest.com/pin/1115977982702412198/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
