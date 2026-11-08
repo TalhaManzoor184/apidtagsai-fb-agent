@@ -274,5 +274,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-08",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "instagram-tags",
+    "format": "educational-tip",
+    "topic": "The 3x3 hashtag clustering strategy to help Instagram categorize posts accurately",
+    "headline": "The 3x3 Instagram Tag Strategy",
+    "postId": "651441308365152_1714805860658150",
+    "url": "https://www.facebook.com/651441308365152_1714805860658150",
+    "pinterest": {
+      "id": "1115977982702500964",
+      "url": "https://www.pinterest.com/pin/1115977982702500964/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
