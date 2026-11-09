@@ -291,5 +291,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-09",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "tiktok-tags",
+    "format": "before-after",
+    "topic": "Before-and-after hashtag makeover for home decor and DIY creators on TikTok",
+    "headline": "Before & After: TikTok Decor Hashtags",
+    "postId": "1182672134710208",
+    "url": "https://www.facebook.com/reel/1182672134710208",
+    "pinterest": {
+      "id": "1115977982702588544",
+      "url": "https://www.pinterest.com/pin/1115977982702588544/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
