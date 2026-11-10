@@ -308,5 +308,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-10",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "youtube-tags",
+    "format": "tool-demo",
+    "topic": "Tool walkthrough showing gaming creators how to generate targeted tags for a tutorial video",
+    "headline": "Building YouTube Tags for Gaming Guides",
+    "postId": "651441308365152_1717264937078909",
+    "url": "https://www.facebook.com/651441308365152_1717264937078909",
+    "pinterest": {
+      "id": "1115977982702656816",
+      "url": "https://www.pinterest.com/pin/1115977982702656816/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
