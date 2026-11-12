@@ -325,5 +325,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-12",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "seo-titles",
+    "format": "checklist",
+    "topic": "A 3-point SEO title checklist for personal finance creators to boost search clarity and clicks.",
+    "headline": "Personal Finance Title Checklist",
+    "postId": "1540307154597546",
+    "url": "https://www.facebook.com/reel/1540307154597546",
+    "pinterest": {
+      "id": "1115977982702812956",
+      "url": "https://www.pinterest.com/pin/1115977982702812956/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
