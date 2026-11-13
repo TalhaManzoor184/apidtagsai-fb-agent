@@ -342,5 +342,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-13",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "trending-ideas",
+    "format": "soft-promo",
+    "topic": "Breaking down AI productivity tools into engaging short-form video formats for creators",
+    "headline": "Simplify AI Content",
+    "postId": "651441308365152_1721051260033610",
+    "url": "https://www.facebook.com/651441308365152_1721051260033610",
+    "pinterest": {
+      "id": "1115977982702886356",
+      "url": "https://www.pinterest.com/pin/1115977982702886356/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
