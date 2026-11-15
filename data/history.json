@@ -359,5 +359,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-15",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "instagram-tags",
+    "format": "step-by-step",
+    "topic": "A 3-step AI hashtag workflow to find search-relevant tags for any niche post",
+    "headline": "Stop Guessing Your Instagram Hashtags",
+    "postId": "1630020458878426",
+    "url": "https://www.facebook.com/reel/1630020458878426",
+    "pinterest": {
+      "id": "1115977982703047481",
+      "url": "https://www.pinterest.com/pin/1115977982703047481/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
