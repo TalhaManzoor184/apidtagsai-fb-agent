@@ -48,6 +48,7 @@ npm run post              # posts for real
 4. The schedule then posts daily at 8:40 PM PKT. Edit the `cron` lines in `.github/workflows/post.yml` for a different time or more posts per day.
 
 Notes
+- Storage: preview artifacts (image/reel/pin) are kept for **1 day** only; each run also deletes any older artifacts. Published posts on Facebook/Pinterest are not affected.
 - GitHub disables scheduled workflows after 60 days without repo activity; the daily history commit keeps it active.
 - Scheduled runs can start a few minutes late at peak times — normal for Actions.
 - Model names and Graph API version are env vars, so updates don't need code changes.

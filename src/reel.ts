@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { readdir, writeFile } from 'node:fs/promises';
+import { readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import satori from 'satori';
@@ -197,6 +197,7 @@ export async function renderReel(post: Post, outPath: string): Promise<void> {
   }
   ff.stdin.end();
   await done;
+  if (audio.args.includes(join(dirname(outPath), 'music.wav'))) await rm(join(dirname(outPath), 'music.wav'), { force: true });
   console.log(`Reel rendered: ${total} frames in ${((Date.now() - started) / 1000).toFixed(1)}s, music: ${audio.label} → ${outPath}`);
 }
 

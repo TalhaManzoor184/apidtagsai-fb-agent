@@ -32,6 +32,7 @@ on:
 
 permissions:
   contents: write   # to commit data/history.json back
+  actions: write    # to delete old preview artifacts
 
 concurrency:
   group: fb-autopost
@@ -86,8 +87,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: post-${{ github.run_id }}
-          path: out/
+          path: |
+            out/
+            !out/music.wav
           if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Delete preview artifacts older than 1 day
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cutoff=$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)
+          gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100" --paginate \
+            --jq ".artifacts[] | select(.expired == false and .created_at < \"$cutoff\") | .id" |
+          while read -r id; do gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id" && echo "deleted artifact $id"; done || true
 
       - name: Save post history
         if: success() || failure()
