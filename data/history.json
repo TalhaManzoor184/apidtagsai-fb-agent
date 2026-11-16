@@ -376,5 +376,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-16",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "tiktok-tags",
+    "format": "myth-vs-fact",
+    "topic": "Debunking the myth of using unrelated viral hashtags on fitness TikTok videos",
+    "headline": "TikTok Tag Myth Debunked",
+    "postId": "651441308365152_1724451313026938",
+    "url": "https://www.facebook.com/651441308365152_1724451313026938",
+    "pinterest": {
+      "id": "1115977982703131773",
+      "url": "https://www.pinterest.com/pin/1115977982703131773/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
