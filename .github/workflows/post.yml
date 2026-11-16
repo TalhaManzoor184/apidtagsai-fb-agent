@@ -84,6 +84,7 @@ jobs:
 
       - name: Upload preview
         if: always()
+        continue-on-error: true   # never fail the run over preview storage
         uses: actions/upload-artifact@v4
         with:
           name: post-${{ github.run_id }}
