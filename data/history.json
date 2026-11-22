@@ -461,5 +461,27 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "seo-blogs",
+    "format": "tool-demo",
+    "topic": "Audit travel blog posts to fix missing heading structure and review estimated performance metrics",
+    "headline": "Audit Travel Blog Posts in Seconds",
+    "postId": "1658526909332622",
+    "url": "https://www.facebook.com/reel/1658526909332622",
+    "keywords": [
+      "website seo checker free",
+      "free website seo checker",
+      "free online seo checker"
+    ],
+    "pinterest": {
+      "id": "1115977982703590179",
+      "url": "https://www.pinterest.com/pin/1115977982703590179/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
