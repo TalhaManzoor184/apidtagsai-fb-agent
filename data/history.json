@@ -505,5 +505,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "instagram-tags",
+    "format": "soft-promo",
+    "topic": "3 Instagram hashtag mistakes handmade craft sellers make that hurt post discovery",
+    "headline": "3 Instagram Tag Mistakes Ruining Your Reach",
+    "postId": "1908345780345396",
+    "url": "https://www.facebook.com/reel/1908345780345396",
+    "pinterest": {
+      "id": "1115977982703598857",
+      "url": "https://www.pinterest.com/pin/1115977982703598857/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
