@@ -427,5 +427,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "video-ideas",
+    "format": "educational-tip",
+    "topic": "The 'Common Mistake' video framework for educational and business creators",
+    "headline": "3 Business Video Ideas That Convert",
+    "postId": "1349406683864444",
+    "url": "https://www.facebook.com/reel/1349406683864444",
+    "pinterest": {
+      "id": "1115977982703589088",
+      "url": "https://www.pinterest.com/pin/1115977982703589088/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
