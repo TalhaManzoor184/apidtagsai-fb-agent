@@ -393,5 +393,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "instagram-tags",
+    "format": "question-challenge",
+    "topic": "A creator challenge helping small business owners audit generic hashtags and generate niche-specific tags.",
+    "headline": "Can your Instagram tags pass this quick audit?",
+    "postId": "2056163578435962",
+    "url": "https://www.facebook.com/reel/2056163578435962",
+    "pinterest": {
+      "id": "1115977982703588415",
+      "url": "https://www.pinterest.com/pin/1115977982703588415/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
