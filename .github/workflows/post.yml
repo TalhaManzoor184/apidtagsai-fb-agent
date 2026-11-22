@@ -61,7 +61,6 @@ jobs:
           MUSIC: ${{ vars.MUSIC || 'auto' }}
           CATEGORY: ${{ inputs.category }}
           PLATFORMS: ${{ inputs.platforms || 'all' }}
-          SEO_CHECKER_LIVE: ${{ vars.SEO_CHECKER_LIVE }}
           IMAGE_MODE: ${{ vars.IMAGE_MODE || 'template' }}
           POST_LANGUAGE: ${{ vars.POST_LANGUAGE || 'English' }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}

@@ -121,7 +121,7 @@ async function main() {
   if (!toFacebook) return; // test runs don't change rotation/history
   history.push({
     date, type, platform: 'facebook', pillar: plan.category.id, format: plan.format.id,
-    topic: post.topic, headline: post.headline, postId, url,
+    topic: post.topic, headline: post.headline, postId, url, ...(post.keywords.length ? { keywords: post.keywords } : {}),
     ...(post.sources?.length ? { sources: post.sources.map(s => s.url).slice(0, 3) } : {}),
     ...(pin ? { pinterest: { id: pin.id, url: pin.url, kind: pin.kind, env: pin.env } } : {}),
     ...(pinError ? { pinterestError: pinError.slice(0, 300) } : {}),

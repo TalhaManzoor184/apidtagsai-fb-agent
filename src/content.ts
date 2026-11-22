@@ -5,7 +5,7 @@ import { BRAND_RULES, CATEGORIES, FORMATS, WEEKDAY_CATEGORIES, pickById, type Ca
 
 export type PostType = 'photo' | 'reel';
 
-export interface Plan { category: Category; format: Format }
+export interface Plan { category: Category; format: Format; keywords?: string[] }
 
 export interface Post {
   pillar: string;        // category id (kept as "pillar" for history compatibility)
@@ -20,6 +20,8 @@ export interface Post {
   caption: string;       // FB post body (no URL, no hashtags)
   hashtags: string[];    // without '#'
   pinTitle: string;      // Pinterest title (≤100)
+  link: string;          // landing page for this post
+  keywords: string[];    // target search keywords used
   pinDescription: string; // Pinterest description (≤500, keyword-rich, no URL)
   imagePrompt: string;   // used only in IMAGE_MODE=gemini
   sources?: Source[];    // research sources (trending category)
@@ -48,9 +50,16 @@ export function planContent(history: HistoryEntry[], now = new Date()): Plan {
   const forced = process.env.CATEGORY?.trim();
   const ids = forced && CATEGORIES.some(c => c.id === forced) ? [forced] : WEEKDAY_CATEGORIES[localDay(now)];
   const category = leastRecent(ids.map(pickById), lastUsedIndex(history, h => h.pillar));
+  let keywords: string[] | undefined;
+  if (category.keywordClusters?.length) {
+    const n = history.filter(h => h.keywords?.length).length; // rotate clusters across keyword posts
+    const cluster = category.keywordClusters[n % category.keywordClusters.length];
+    const k = Math.floor(Math.random() * cluster.length);
+    keywords = [cluster[k], ...cluster.filter((_, i) => i !== k)].slice(0, 3);
+  }
   const lastFormat = history.at(-1)?.format;
   const format = leastRecent(FORMATS.filter(f => f.id !== lastFormat), lastUsedIndex(history, h => h.format));
-  return { category, format };
+  return { category, format, keywords };
 }
 
 const SYSTEM = `You are the social media content lead for ${config.brandName} (${config.siteUrl}), a site with free AI tools for creators: Instagram, TikTok and YouTube tag generators, AI video ideas, AI YouTube descriptions, AI SEO titles, trending video ideas, plus SEO resources and blog content.
@@ -76,7 +85,7 @@ Goal: ${c.goal}
 Audience: ${c.audience}
 Content ideas to choose from (pick one, or a specific angle of one; make it concrete, e.g. name the niche):
 ${c.ideas.map(i => `- ${i}`).join('\n')}
-${c.rules?.length ? `Category rules:\n${c.rules.map(r => `- ${r}`).join('\n')}\n` : ''}
+${c.rules?.length ? `Category rules:\n${c.rules.map(r => `- ${r}`).join('\n')}\n` : ''}${plan.keywords?.length ? `TARGET SEARCH KEYWORDS (real rising Google searches): "${plan.keywords.join('", "')}". Use the first one naturally (exact wording) in pinTitle and in pinDescription, and use one of them once in the caption or subline. No keyword stuffing.\n` : ''}
 FORMAT: ${f.name}: ${f.how}
 ${notes ? `\nRESEARCH NOTES (from web search today; the only allowed source for anything called "trending"):\n${notes}\n` : c.research ? '\nNo research available today: write an evergreen idea and do not call anything trending.\n' : ''}
 Already published in the last 30 days (do NOT reuse these topics, hooks or angles):
@@ -135,6 +144,8 @@ function validate(raw: any, plan: Plan, sources?: Source[]): Post {
     caption: String(raw.caption ?? '').replace(/https?:\/\/\S+/g, '').replace(/(^|\s)#[\p{L}\p{N}_]+/gu, '$1').trim(),
     hashtags: ['RapidTagsAI', ...new Set(hashtags)].slice(0, 8),
     pinTitle: clamp(raw.pinTitle || raw.headline, 100),
+    link: plan.category.url ?? config.siteUrl,
+    keywords: plan.keywords ?? [],
     pinDescription: clamp(String(raw.pinDescription || raw.subline || '').replace(/https?:\/\/\S+/g, '').trim(), 500),
     imagePrompt: String(raw.imagePrompt ?? ''),
     ...(sources?.length ? { sources: sources.slice(0, 5) } : {}),
@@ -177,7 +188,7 @@ export async function generatePost(plan: Plan, type: PostType, history: HistoryE
 
 /** Final Facebook message: caption + tracked link + hashtags. */
 export function trackedUrl(post: Post, date: string, type: PostType, source: 'facebook' | 'pinterest'): string {
-  const url = new URL(config.siteUrl);
+  const url = new URL(post.link || config.siteUrl);
   url.searchParams.set('utm_source', source);
   url.searchParams.set('utm_medium', 'social');
   url.searchParams.set('utm_campaign', `autopost_${post.pillar}`);
@@ -186,7 +197,7 @@ export function trackedUrl(post: Post, date: string, type: PostType, source: 'fa
 }
 
 export function buildMessage(post: Post, date: string, type: PostType = 'photo'): string {
-  const url = new URL(config.siteUrl);
+  const url = new URL(post.link || config.siteUrl);
   url.searchParams.set('utm_source', 'facebook');
   url.searchParams.set('utm_medium', 'social');
   url.searchParams.set('utm_campaign', `autopost_${post.pillar}`);

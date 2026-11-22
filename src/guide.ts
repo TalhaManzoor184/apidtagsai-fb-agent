@@ -13,13 +13,35 @@ export interface Category {
   rules?: string[];
   /** Needs fresh, verifiable information (web research) before writing. */
   research?: boolean;
+  /** Landing page for this category's link (defaults to the site home). */
+  url?: string;
+  /** Search keyword clusters (from Google Trends exports); one cluster per post, rotated. */
+  keywordClusters?: string[][];
 }
 
-/**
- * Set the repo Variable SEO_CHECKER_LIVE=true once the SEO website/traffic checker is live on the site.
- * Until then posts in that category stay educational and never claim the site has a checker.
- */
-const SEO_CHECKER_LIVE = process.env.SEO_CHECKER_LIVE === 'true';
+/** RapidTagsAI SEO Checker / Website Traffic Checker (verified on the live page, Nov 2026). */
+export const SEO_CHECKER_URL = 'https://rapidtagsai.com/wp-blog/traffic-checker/';
+const SEO_CHECKER_FACTS = `RapidTagsAI's free SEO Checker / Website Traffic Checker (${SEO_CHECKER_URL}), verified features:
+- 100% free, no account or signup; enter any public website URL; an audit takes about 10-20 seconds; powered by Google Gemini AI.
+- Overall SEO Score out of 100 (70-100 good, 40-69 needs improvement, below 40 serious issues).
+- On-page analysis: title tag, meta description, H1/H2 structure, canonical URL, robots meta.
+- Page speed & performance: mobile-friendliness, Core Web Vitals (LCP, CLS, FID), load speed, image optimisation.
+- Domain: estimated Domain Rating, domain age, HTTPS status, spam score, estimated domain value.
+- Backlinks: estimated backlink count, referring domains, link quality, anchor text diversity.
+- Traffic: estimated monthly organic traffic, traffic trend, top 5 countries.
+- Keywords: estimated top-ranking keywords with positions and search volumes.
+- Issues (critical + warnings) and Recommendations ranked High/Medium/Low impact.
+Honesty rules for this tool: every metric is an AI ESTIMATE from public signals, not live crawl data, so always say "estimated"/"estimate" for traffic, DR, backlinks and rankings. Never present it as exact, official or as a replacement for Google Search Console / PageSpeed Insights (it suggests pairing with them). It does NOT check grammar, plagiarism, indexing, keyword difficulty or live SERP positions for a keyword you type: never claim those.`;
+
+/** Rising Google searches (Worldwide, Nov 2025-Nov 2026, data/keywords/seo-checker-rising-2026-11.csv), only those the tool truly answers. */
+const SEO_CHECKER_KEYWORDS: string[][] = [
+  ['free website seo checker', 'website seo checker free', 'free online seo checker', 'best free seo checker'],
+  ['online seo checker', 'seo checker online free', 'on page seo checker free'],
+  ['website traffic checker', 'free website traffic checker', 'check website traffic'],
+  ['free backlinks checker', 'backlinks checker', 'free domain authority checker', 'domain authority checker'],
+  ['seo rank checker free', 'free seo rank checker', 'seo keyword checker', 'website seo rank checker'],
+];
+
 
 export const CATEGORIES: Category[] = [
   {
@@ -132,23 +154,25 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'seo-checker',
-    name: 'SEO Website Checker & SEO Traffic Checker',
-    goal: 'Educational content for website owners, bloggers and digital marketers.',
-    audience: 'Website owners, bloggers, digital marketers',
+    name: 'Free SEO Checker & Website Traffic Checker',
+    goal: 'Promote the free RapidTagsAI SEO Checker by teaching one useful website-audit idea that the tool helps with.',
+    audience: 'Website owners, bloggers, small businesses and digital marketers',
     ideas: [
-      'Website SEO audit checklist',
-      'Common on-page SEO issues',
-      'How to understand website traffic',
-      'Organic traffic growth strategies',
-      'Keyword research basics',
-      'Technical SEO mistakes',
-      'How to evaluate website performance',
-      'How AI can assist with SEO research',
+      'What your SEO score out of 100 means and what to fix first',
+      'A 5-minute website SEO audit checklist (title, meta description, H1, canonical, robots)',
+      'Core Web Vitals (LCP, CLS) explained simply and how to spot problems',
+      'How to read an estimated traffic trend and top countries for your site',
+      'Backlinks and domain rating basics: quality over quantity',
+      'Spam score, HTTPS and other domain health signals',
+      'Finding the keywords your site already ranks for (estimated) and building on them',
+      'Common on-page SEO issues the audit flags, with the fix',
+      'Free SEO checker vs paid tools: when a free audit is enough and when to go deeper',
+      'Tool demo: audit a site in 20 seconds and act on the top 3 recommendations',
     ],
-    cta: 'Explore SEO tools and resources at RapidTagsAI.com.',
-    rules: SEO_CHECKER_LIVE
-      ? ['RapidTagsAI.com has an SEO website checker and SEO traffic checker; describe them only in general terms (no specific metrics or data sources).']
-      : ['Do NOT claim that RapidTagsAI.com has an SEO checker, traffic checker or audit tool. Keep it purely educational; the CTA points to tools and resources in general.'],
+    cta: 'Run a free SEO audit at RapidTagsAI.com — no signup.',
+    url: SEO_CHECKER_URL,
+    keywordClusters: SEO_CHECKER_KEYWORDS,
+    rules: [SEO_CHECKER_FACTS],
   },
   {
     id: 'seo-blogs',
@@ -167,7 +191,10 @@ export const CATEGORIES: Category[] = [
       'AI writing workflows that keep originality and accuracy',
       'A short, useful SEO tip that invites readers to explore more resources',
     ],
-    cta: 'Explore more SEO resources at RapidTagsAI.com.',
+    cta: 'Check your blog\'s SEO free with the RapidTagsAI SEO Checker.',
+    url: SEO_CHECKER_URL,
+    keywordClusters: SEO_CHECKER_KEYWORDS,
+    rules: ['Teach the blogging tip first; mention the free SEO Checker only as the natural next step (audit the post\'s title, meta description and headings).', SEO_CHECKER_FACTS],
   },
 ];
 
@@ -178,8 +205,8 @@ export const WEEKDAY_CATEGORIES: Record<number, string[]> = {
   3: ['youtube-tags'],
   4: ['video-ideas'],
   5: ['youtube-descriptions', 'seo-titles'],
-  6: ['trending-ideas'],
-  0: ['seo-checker', 'seo-blogs'],
+  6: ['trending-ideas', 'seo-blogs'],
+  0: ['seo-checker'],                 // SEO Checker promotion every Sunday
 };
 
 export interface Format { id: string; name: string; how: string }

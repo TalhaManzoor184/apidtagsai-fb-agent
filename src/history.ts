@@ -13,6 +13,7 @@ export interface HistoryEntry {
   postId?: string;
   url?: string;
   sources?: string[];
+  keywords?: string[];
   pinterest?: { id: string; url: string; kind: string; env: string };
   pinterestError?: string;
 }

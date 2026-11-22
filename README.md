@@ -8,11 +8,11 @@ GitHub Actions (cron) → weekday category + format → (trend research) → LLM
 ```
 
 - **Content guide:** `docs/content-guide.md` (original brief) is encoded in `src/guide.ts`: 9 categories with goals, ideas, CTAs and rules; the weekly calendar; 9 post formats; brand voice and hard rules.
-- **Weekly calendar (PKT):** Mon Instagram tags · Tue TikTok tags · Wed YouTube tags · Thu video ideas · Fri YouTube descriptions / SEO titles · Sat trending ideas · Sun SEO checker / SEO blogs. Two-category days alternate.
+- **Weekly calendar (PKT):** Mon Instagram tags · Tue TikTok tags · Wed YouTube tags · Thu video ideas · Fri YouTube descriptions / SEO titles · Sat trending ideas / SEO blogs · Sun SEO Checker promotion. Two-category days alternate.
 - **Formats** rotate least-recently-used (tip, step-by-step, before/after, myth vs fact, mistakes, checklist, tool demo, challenge, soft promo).
 - **No repeats:** everything published in the last 30 days is fed to the model. `data/history.json` records date, platform, type, category, format, topic, URL.
 - **Trending (Saturday):** Gemini + Google Search grounding fetches current trends with sources first; without verified research the post is written as an evergreen idea and never called "trending".
-- **SEO checker claims:** off until you set repo Variable `SEO_CHECKER_LIVE=true`.
+- **SEO Checker promotion:** `seo-checker` and `seo-blogs` posts link to https://rapidtagsai.com/wp-blog/traffic-checker/, use only verified tool features (all metrics described as estimates), and rotate target keywords from `data/keywords/seo-checker-rising-2026-11.csv` (Google Trends rising searches) into captions and Pin titles.
 - **Guardrails:** captions that promise guarantees are rejected and regenerated; 3-8 hashtags; CTA per category.
 - **Images:** `template` mode = branded card (free, consistent). `gemini` mode = AI-generated background with the same branded overlay (falls back to template if the image call fails).
 - **Providers:** Claude (default) or Gemini for text, switch with `LLM_PROVIDER`.
