@@ -444,5 +444,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "youtube-descriptions",
+    "format": "before-after",
+    "topic": "Before and after YouTube description makeover for a portrait lighting tutorial",
+    "headline": "Before & After: YouTube Descriptions",
+    "postId": "651441308365152_1731184459020290",
+    "url": "https://www.facebook.com/651441308365152_1731184459020290",
+    "pinterest": {
+      "id": "1115977982703589450",
+      "url": "https://www.pinterest.com/pin/1115977982703589450/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
