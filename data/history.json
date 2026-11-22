@@ -483,5 +483,27 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "seo-checker",
+    "format": "checklist",
+    "topic": "5-minute on-page and technical SEO checklist for small business websites and bloggers",
+    "headline": "5-Min On-Page SEO Checklist",
+    "postId": "651441308365152_1731193675686035",
+    "url": "https://www.facebook.com/651441308365152_1731193675686035",
+    "keywords": [
+      "on page seo checker free",
+      "online seo checker",
+      "seo checker online free"
+    ],
+    "pinterest": {
+      "id": "1115977982703590408",
+      "url": "https://www.pinterest.com/pin/1115977982703590408/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
