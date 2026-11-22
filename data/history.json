@@ -410,5 +410,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-22",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "youtube-tags",
+    "format": "mistakes",
+    "topic": "Three common YouTube tag mistakes technical tutorial creators make and how to fix them.",
+    "headline": "3 YouTube Tag Mistakes to Avoid",
+    "postId": "651441308365152_1731171839021552",
+    "url": "https://www.facebook.com/651441308365152_1731171839021552",
+    "pinterest": {
+      "id": "1115977982703588567",
+      "url": "https://www.pinterest.com/pin/1115977982703588567/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
