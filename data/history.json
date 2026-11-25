@@ -539,5 +539,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-25",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "youtube-tags",
+    "format": "myth-vs-fact",
+    "topic": "Debunking the myth that copying competitor YouTube tags boosts suggested views",
+    "headline": "Copying Big Creator Tags Doesn't Work",
+    "postId": "1145671798349378",
+    "url": "https://www.facebook.com/reel/1145671798349378",
+    "pinterest": {
+      "id": "1115977982703759544",
+      "url": "https://www.pinterest.com/pin/1115977982703759544/",
+      "kind": "video",
+      "env": "production"
+    }
   }
 ]
