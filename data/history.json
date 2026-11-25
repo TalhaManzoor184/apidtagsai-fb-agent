@@ -556,5 +556,22 @@
       "kind": "video",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-25",
+    "type": "photo",
+    "platform": "facebook",
+    "pillar": "video-ideas",
+    "format": "question-challenge",
+    "topic": "The 'Tools I Replaced' video challenge for tech and productivity creators",
+    "headline": "Tech Creator Challenge: The Replacement",
+    "postId": "651441308365152_1735032891968780",
+    "url": "https://www.facebook.com/651441308365152_1735032891968780",
+    "pinterest": {
+      "id": "1115977982703835578",
+      "url": "https://www.pinterest.com/pin/1115977982703835578/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
