@@ -573,5 +573,22 @@
       "kind": "image",
       "env": "production"
     }
+  },
+  {
+    "date": "2026-11-27",
+    "type": "reel",
+    "platform": "facebook",
+    "pillar": "seo-titles",
+    "format": "mistakes",
+    "topic": "3 mistakes creators make when balancing curiosity and search intent in titles",
+    "headline": "Stop Writing Mystery Titles Nobody Clicks",
+    "postId": "4693258987661475",
+    "url": "https://www.facebook.com/reel/4693258987661475",
+    "pinterest": {
+      "id": "1115977982703911824",
+      "url": "https://www.pinterest.com/pin/1115977982703911824/",
+      "kind": "image",
+      "env": "production"
+    }
   }
 ]
